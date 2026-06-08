@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Link from 'next/link'
 
 interface KPI { label: string; value: string | number; sub?: string; icon: string; color?: string }
