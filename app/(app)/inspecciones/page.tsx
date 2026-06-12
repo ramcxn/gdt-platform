@@ -76,9 +76,9 @@ export default async function InspeccionesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
-                      {insp.danos_fisicos && <AlertTriangle className="w-5 h-5 text-amber-500" title="Daños físicos" />}
-                      {insp.remolque1_sello && <Lock className="w-5 h-5 text-indigo-400" title="Sello verificado" />}
-                      {insp.fumigacion && <CheckCircle className="w-5 h-5 text-green-400" title="Fumigación OK" />}
+                      {insp.danos_fisicos && <span title="Daños físicos"><AlertTriangle className="w-5 h-5 text-amber-500" /></span>}
+                      {insp.remolque1_sello && <span title="Sello verificado"><Lock className="w-5 h-5 text-indigo-400" /></span>}
+                      {insp.fumigacion && <span title="Fumigación OK"><CheckCircle className="w-5 h-5 text-green-400" /></span>}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">

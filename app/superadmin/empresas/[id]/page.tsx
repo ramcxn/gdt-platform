@@ -23,7 +23,7 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
         <Link href="/superadmin" className="text-slate-400 hover:text-white text-sm">← Empresas</Link>
         <h1 className="text-2xl font-bold text-white">{empresa.nombre_comercial}</h1>
         <Badge text={empresa.estado ?? 'Activo'} color={empresa.estado === 'Activo' ? 'green' : empresa.estado === 'Suspendido' ? 'red' : 'amber'} />
-        <Badge text={empresa.plan ?? 'Demo'} color={{ Enterprise:'purple', Premium:'blue', Básico:'green', Demo:'amber' }[empresa.plan] ?? 'slate'} />
+        <Badge text={empresa.plan ?? 'Demo'} color={({ Enterprise:'purple', Premium:'blue', Básico:'green', Demo:'amber' } as Record<string, string>)[empresa.plan] ?? 'slate'} />
       </div>
 
       {/* Info cards */}
