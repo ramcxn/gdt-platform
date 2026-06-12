@@ -19,7 +19,6 @@ const NAV_GROUPS = [
     { href: '/visitas',              label: 'Visitas/Proveedores',  icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
     { href: '/revision-documental',  label: 'Revisión Documental', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     { href: '/inventario-operador',  label: 'Inventario Operador', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-    { href: '/clientes',             label: 'Clientes CTPAT',      icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
     { href: '/analisis-ruta',        label: 'Análisis de Ruta',    icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
     { href: '/analisis-riesgos',     label: 'Análisis Riesgos',    icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
     { href: '/acciones-correctivas', label: 'Acciones Correctivas',icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -39,16 +38,23 @@ const NAV_GROUPS = [
     { href: '/mantenimiento',label: 'Mantenimiento',       icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
     { href: '/instalaciones', label: 'Mant. Instalaciones', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
   ]},
+  { label: 'CRM / Comercial', items: [
+    { href: '/cotizaciones', label: 'Cotizaciones', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { href: '/clientes',     label: 'Clientes CTPAT', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { href: '/reportes',     label: 'Reportes',       icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  ]},
   { label: 'Configuración', items: [
-    { href: '/catalogo', label: 'Catálogos',         icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
-    { href: '/usuarios', label: 'Gestión Usuarios',  icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-    { href: '/reportes', label: 'Reportes',          icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { href: '/catalogo',       label: 'Catálogos',        icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+    { href: '/usuarios',       label: 'Gestión Usuarios', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+    { href: '/configuracion',  label: 'Mi Empresa',       icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   ]},
 ]
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [userName, setUserName] = useState('')
+  const [userRol, setUserRol]   = useState('')
   const [empresa, setEmpresa]   = useState('')
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router   = useRouter()
@@ -57,9 +63,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/login'); return }
-      const { data: perfil } = await supabase.from('usuarios').select('nombre,empresa_id').eq('id', user.id).single()
+      const { data: perfil } = await supabase.from('usuarios').select('nombre,empresa_id,rol').eq('id', user.id).single()
       if (perfil) {
         setUserName(perfil.nombre)
+        setUserRol(perfil.rol ?? '')
+        setIsSuperAdmin(perfil.rol === 'SuperAdmin')
         if (perfil.empresa_id) {
           const { data: emp } = await supabase.from('empresas').select('nombre_comercial').eq('id', perfil.empresa_id).single()
           if (emp) setEmpresa(emp.nombre_comercial)
@@ -114,23 +122,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
 
+      {/* SuperAdmin link */}
+      {isSuperAdmin && (
+        <div className="px-3 pb-1">
+          <Link href="/superadmin"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-purple-300 hover:bg-purple-500/10 text-xs font-semibold transition-colors border border-purple-500/20">
+            ⚡ Panel SuperAdmin
+          </Link>
+        </div>
+      )}
+
       {/* User */}
-      <div className="px-3 py-4 border-t border-white/10">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5">
+      <div className="px-3 py-3 border-t border-white/10">
+        <Link href="/perfil" onClick={() => setSidebarOpen(false)}
+          className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
           <div className="w-7 h-7 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
             {userName ? userName[0].toUpperCase() : '?'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-medium truncate">{userName}</p>
-            <p className="text-blue-300 text-xs">Admin</p>
+            <p className="text-blue-300 text-xs truncate">{userRol || 'Cargando...'}</p>
           </div>
-          <button onClick={handleLogout} title="Cerrar sesión"
-            className="text-blue-300 hover:text-white transition-colors cursor-pointer">
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); handleLogout() }}
+            title="Cerrar sesión"
+            className="text-blue-300 hover:text-red-400 transition-colors cursor-pointer flex-shrink-0">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
           </button>
-        </div>
+        </Link>
       </div>
     </aside>
   )
