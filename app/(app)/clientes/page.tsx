@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 export default async function ClientesCTPatPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('clientes_ctpat').select('*').eq('empresa_id', eid).order('nombre')
   const hoy = new Date()
   const porVencer = rows?.filter(r => { if (!r.fecha_vencimiento) return false; const d = new Date(r.fecha_vencimiento); return d > hoy && d <= new Date(Date.now() + 30*86400000) }).length ?? 0

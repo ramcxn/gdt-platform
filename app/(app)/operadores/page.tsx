@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 export default async function GestionOperadoresPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('operadores').select('*').eq('empresa_id', eid).order('nombre')
   const hoy = new Date()
   const vencidos  = rows?.filter(r => r.vigencia_licencia && new Date(r.vigencia_licencia) < hoy).length ?? 0

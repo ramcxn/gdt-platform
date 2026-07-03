@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 export default async function AlmacenPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('almacen_refacciones').select('*').eq('empresa_id', eid).order('nombre')
   const bajoStock = rows?.filter(r => r.cantidad <= r.cantidad_minima).length ?? 0
   const valorTotal = rows?.reduce((s,r) => s + ((r.cantidad||0)*(r.precio_unitario||0)), 0) ?? 0

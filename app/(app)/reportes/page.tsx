@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 
 function StatCard({ icon, label, value, sub, color = '#1E3A5F' }: any) {
@@ -17,10 +18,7 @@ function StatCard({ icon, label, value, sub, color = '#1E3A5F' }: any) {
 
 export default async function ReportesPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
-
+  const { empresaId: eid } = await getSessionContext()
   const hoy = new Date()
   const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString()
   const inicioSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay())).toISOString()

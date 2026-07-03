@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 
 const ESTADO_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -11,11 +12,7 @@ const ESTADO_CONFIG: Record<string, { label: string; cls: string }> = {
 
 export default async function ViajesPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  if (!user) return null
-
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   if (!eid) return null
 
   const now  = new Date()

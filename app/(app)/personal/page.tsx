@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 
 export default async function PersonalPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('empleados').select('*').eq('empresa_id', eid).order('nombre')
   const activos = rows?.filter(r => r.activo).length ?? 0
 

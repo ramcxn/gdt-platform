@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 
 function Badge({ text, color }: { text: string; color: string }) {
   const c: Record<string,string> = { green:'bg-green-500/10 text-green-400 border-green-500/20', amber:'bg-amber-500/10 text-amber-400 border-amber-500/20', blue:'bg-blue-500/10 text-blue-400 border-blue-500/20', slate:'bg-slate-500/10 text-slate-300 border-slate-500/20', purple:'bg-purple-500/10 text-purple-400 border-purple-500/20' }
@@ -8,9 +9,7 @@ const tipoColor: Record<string,string> = { Visita:'slate', Proveedor:'blue', Cli
 
 export default async function VisitasPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('visitas_proveedores').select('*').eq('empresa_id', eid).order('created_at', { ascending: false }).limit(50)
   const activos = rows?.filter(r => !r.salida).length ?? 0
   const hoy = rows?.filter(r => { const d = new Date(r.created_at); const n = new Date(); return d.toDateString() === n.toDateString() }).length ?? 0

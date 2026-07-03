@@ -1,18 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 import { InspeccionCTpat } from '@/lib/types'
 import { AlertTriangle, Lock, CheckCircle, ClipboardList } from 'lucide-react'
 
 export default async function InspeccionesPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  if (!user) return null
+  const { empresaId: eid } = await getSessionContext()
+  if (!eid) return null
 
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()
   const { data: inspecciones } = await supabase
     .from('inspecciones_ctpat')
     .select('*')
-    .eq('empresa_id', perfil?.empresa_id)
+    .eq('empresa_id', eid)
     .order('fecha', { ascending: false })
     .limit(50)
 

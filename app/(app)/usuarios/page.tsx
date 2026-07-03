@@ -1,23 +1,20 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import UsuariosManager from './UsuariosManager'
 
 export default async function UsuariosPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase
-    .from('usuarios')
-    .select('empresa_id, rol, nombre')
-    .eq('id', user!.id)
-    .single()
-  const eid = perfil?.empresa_id
+  const { user, perfil, empresaId: eid } = await getSessionContext()
+  if (!user || !perfil) return null
+
   const { data: rows } = await supabase
     .from('usuarios')
     .select('*')
     .eq('empresa_id', eid)
     .order('nombre')
 
-  const canManage = ['SuperAdmin', 'Admin_Empresa'].includes(perfil?.rol ?? '')
+  const canManage = ['SuperAdmin', 'Admin_Empresa'].includes(perfil.rol ?? '')
 
   return (
     <div className="space-y-6">
@@ -31,8 +28,8 @@ export default async function UsuariosPage() {
       </div>
       <UsuariosManager
         usuarios={rows ?? []}
-        currentUserId={user!.id}
-        currentRol={perfil?.rol ?? 'Operador'}
+        currentUserId={user.id}
+        currentRol={perfil.rol ?? 'Operador'}
         canManage={canManage}
       />
     </div>

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 function Badge({ text, color }: { text: string; color: string }) {
   const c: Record<string,string> = { green:'bg-green-500/10 text-green-400 border-green-500/20', amber:'bg-amber-500/10 text-amber-400 border-amber-500/20', red:'bg-red-500/10 text-red-400 border-red-500/20', slate:'bg-slate-500/10 text-slate-300 border-slate-500/20' }
   return <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${c[color]??c.slate}`}>{text}</span>
@@ -6,9 +7,7 @@ function Badge({ text, color }: { text: string; color: string }) {
 const eColor: Record<string,string> = { Operativo:'green', En_Reparacion:'amber', Dado_de_Baja:'red' }
 export default async function InventarioPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('inventario_equipo').select('*').eq('empresa_id', eid).order('nombre')
   const valor = rows?.filter(r=>r.estado!=='Dado_de_Baja').reduce((s,r)=>s+(r.valor||0),0)??0
   return (

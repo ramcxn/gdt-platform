@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 
 function Badge({ text, color }: { text: string; color: string }) {
   const c: Record<string,string> = { green:'bg-green-500/10 text-green-400 border-green-500/20', amber:'bg-amber-500/10 text-amber-400 border-amber-500/20', red:'bg-red-500/10 text-red-400 border-red-500/20', slate:'bg-slate-500/10 text-slate-300 border-slate-500/20', blue:'bg-blue-500/10 text-blue-400 border-blue-500/20' }
@@ -8,9 +9,7 @@ const tipoColor: Record<string,string> = { Normal:'green', Retardo:'amber', Falt
 
 export default async function AsistenciaPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
+  const { empresaId: eid } = await getSessionContext()
   const hoy = new Date().toISOString().split('T')[0]
   const { data: rows } = await supabase.from('asistencia').select('*').eq('empresa_id', eid).order('created_at', { ascending: false }).limit(50)
   const hoyRows = rows?.filter(r => r.fecha === hoy) ?? []

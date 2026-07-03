@@ -1,14 +1,17 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import PerfilForm from './PerfilForm'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
+  const { user } = await getSessionContext()
+  if (!user) return null
+
   const { data: perfil } = await supabase
     .from('usuarios')
     .select('*, empresas(nombre_comercial, plan, estado)')
-    .eq('id', user!.id)
+    .eq('id', user.id)
     .single()
 
   return (
@@ -20,10 +23,10 @@ export default async function PerfilPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">{perfil?.nombre ?? 'Mi Perfil'}</h1>
-          <p className="text-slate-400 text-sm">{user?.email}</p>
+          <p className="text-slate-400 text-sm">{user.email}</p>
         </div>
       </div>
-      <PerfilForm perfil={perfil} userEmail={user?.email ?? ''} />
+      <PerfilForm perfil={perfil} userEmail={user.email} />
     </div>
   )
 }

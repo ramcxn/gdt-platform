@@ -1,21 +1,22 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import ConfiguracionForm from './ConfiguracionForm'
 import { redirect } from 'next/navigation'
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id, rol').eq('id', user!.id).single()
+  const { user, perfil, empresaId } = await getSessionContext()
+  if (!user || !perfil || !empresaId) { redirect('/login'); return null }
 
-  if (!['SuperAdmin','Admin_Empresa'].includes(perfil?.rol ?? '')) {
+  if (!['SuperAdmin','Admin_Empresa'].includes(perfil.rol ?? '')) {
     redirect('/dashboard')
   }
 
   const { data: empresa } = await supabase
     .from('empresas')
     .select('*')
-    .eq('id', perfil!.empresa_id)
+    .eq('id', empresaId)
     .single()
 
   return (

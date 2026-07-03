@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 
 function Badge({ text, color }: { text: string; color: string }) {
@@ -10,10 +11,7 @@ const estadoColor: Record<string,string> = { Borrador:'slate', Enviada:'blue', A
 
 export default async function CotizacionesPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
-
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase
     .from('cotizaciones')
     .select('*')

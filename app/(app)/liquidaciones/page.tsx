@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 
 function Badge({ text, color }: { text: string; color: string }) {
@@ -9,10 +10,7 @@ const estadoColor: Record<string,string> = { Pendiente:'amber', Aprobada:'blue',
 
 export default async function LiquidacionesPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
-  const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
-  const eid = perfil?.empresa_id
-
+  const { empresaId: eid } = await getSessionContext()
   const { data: rows } = await supabase.from('liquidaciones').select('*').eq('empresa_id', eid).order('created_at', { ascending: false }).limit(50)
   const total      = rows?.reduce((s, r) => s + (r.total ?? 0), 0) ?? 0
   const pendientes = rows?.filter(r => r.estado === 'Pendiente').length ?? 0
