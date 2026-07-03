@@ -47,12 +47,12 @@ export default async function ReportesPage() {
     supabase.from('rondines').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).gte('inicio', inicioMes),
     supabase.from('mantenimiento').select('*', { count: 'exact', head: true }).eq('empresa_id', eid),
     supabase.from('mantenimiento').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).eq('estado', 'Pendiente'),
-    supabase.from('analisis_riesgos').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).in('nivel_riesgo', ['Alto','Critico']),
+    supabase.from('analisis_riesgos').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).in('nivel', ['Alto','Crítico']),
     supabase.from('acciones_correctivas').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).in('estado', ['Abierta','En_Proceso']),
     supabase.from('empleados').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).eq('activo', true),
     supabase.from('tractos').select('*', { count: 'exact', head: true }).eq('empresa_id', eid).eq('activo', true),
     supabase.from('viajes').select('tracto_numero, operador_nombre, origen, destino, estado, created_at').eq('empresa_id', eid).order('created_at', { ascending: false }).limit(5),
-    supabase.from('inspecciones_ctpat').select('tracto_numero, tipo_movimiento, fecha, resultado_final').eq('empresa_id', eid).order('fecha', { ascending: false }).limit(5),
+    supabase.from('inspecciones_ctpat').select('tracto_numero, tipo_movimiento, fecha, danos_fisicos').eq('empresa_id', eid).order('fecha', { ascending: false }).limit(5),
   ])
 
   const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
@@ -141,8 +141,8 @@ export default async function ReportesPage() {
                   <p className="text-white text-sm font-medium">{ins.tracto_numero} — {ins.tipo_movimiento}</p>
                   <p className="text-slate-500 text-xs">{new Date(ins.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${ins.resultado_final === 'Aprobado' ? 'bg-green-500/10 text-green-400 border-green-500/20' : ins.resultado_final === 'Rechazado' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-slate-500/10 text-slate-300 border-slate-500/20'}`}>
-                  {ins.resultado_final ?? 'Pendiente'}
+                <span className={`text-xs px-2 py-0.5 rounded-full border ${ins.danos_fisicos ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-green-500/10 text-green-400 border-green-500/20'}`}>
+                  {ins.danos_fisicos ? 'Con daños' : 'Sin daños'}
                 </span>
               </div>
             ))}
