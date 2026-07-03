@@ -422,7 +422,7 @@ export default function NuevaInspeccionPage() {
             <button onClick={() => setStep(3)} className="px-4 py-2 text-sm text-slate-400 hover:text-white cursor-pointer">← Anterior</button>
             <button onClick={handleSubmit} disabled={saving}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50 cursor-pointer shadow-sm transition-transform hover:scale-105"
-              style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>
+              className='btn-accent'>
               {saving ? 'Guardando...' : <><Save className="w-4 h-4" /> Guardar inspección</>}
             </button>
           </div>

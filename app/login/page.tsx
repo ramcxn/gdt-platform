@@ -69,7 +69,7 @@ export default function LoginPage() {
             <button
               type="submit" disabled={loading}
               className="w-full py-2.5 px-4 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-60 cursor-pointer"
-              style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}
+              className='btn-accent'
             >
               {loading ? 'Verificando...' : 'Entrar al sistema'}
             </button>

@@ -87,7 +87,7 @@ export default function NuevaLiquidacionPage() {
         </div>
         <div className="flex justify-between">
           <Link href="/liquidaciones" className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">← Cancelar</Link>
-          <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50 cursor-pointer" style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>
+          <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50 cursor-pointer" className='btn-accent'>
             {saving?'Guardando...':'💾 Guardar'}
           </button>
         </div>

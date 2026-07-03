@@ -17,10 +17,10 @@ export default async function Page() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl text-xl flex items-center justify-center flex-shrink-0" style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>📄</div>
+          <div className="w-10 h-10 rounded-xl text-xl flex items-center justify-center flex-shrink-0" className='btn-accent'>📄</div>
           <div><h1 className="text-xl font-bold text-white">Revisión Documental</h1><p className="text-slate-400 text-sm">Control de vigencia de documentos y permisos</p></div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer" style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer" className='btn-accent'>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>Nuevo
         </button>
       </div>

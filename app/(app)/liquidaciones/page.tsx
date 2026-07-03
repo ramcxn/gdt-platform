@@ -20,10 +20,10 @@ export default async function LiquidacionesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>💰</div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" className='btn-accent'>💰</div>
           <div><h1 className="text-xl font-bold text-white">Liquidaciones</h1><p className="text-slate-400 text-sm">Pagos y compensaciones de operadores</p></div>
         </div>
-        <Link href="/liquidaciones/nueva" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold hover:scale-105 transition-transform" style={{background:'linear-gradient(135deg,#1E3A5F,#2E6DA4)'}}>
+        <Link href="/liquidaciones/nueva" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold hover:scale-105 transition-transform" className='btn-accent'>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>Nueva Liquidación
         </Link>
       </div>
