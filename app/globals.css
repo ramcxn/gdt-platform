@@ -1,91 +1,121 @@
 @import "tailwindcss";
 
-@theme {
-  --color-gdt-900: #0f1f35;
-  --color-gdt-800: #1E3A5F;
-  --color-gdt-700: #234b78;
-  --color-gdt-600: #2E6DA4;
-  --color-gdt-500: #3a82c3;
-  --color-gdt-400: #5a9fd4;
-  --color-gdt-100: #D5E8F0;
-  --color-gdt-50:  #eef6fb;
+/* ============================================================
+   GDT Platform — Theme System
+   CSS custom properties for dark/light mode
+   ============================================================ */
+
+:root,
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-body: #0a1526;
+  --bg-sidebar: linear-gradient(180deg, #0f1f35 0%, #1E3A5F 100%);
+  --bg-card: rgba(15, 31, 53, 0.7);
+  --bg-card-solid: #0f1f35;
+  --bg-input: #0f1f35;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-hover-strong: rgba(255, 255, 255, 0.1);
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-muted: #475569;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+
+  /* Accents */
+  --accent-gradient: linear-gradient(135deg, #1E3A5F, #2E6DA4);
+  --accent-primary: #2E6DA4;
+  --accent-secondary: #1E3A5F;
+
+  /* Sidebar */
+  --sidebar-text: rgba(191, 219, 254, 0.8);
+  --sidebar-active-bg: rgba(255, 255, 255, 0.15);
+  --sidebar-active-text: #ffffff;
+  --sidebar-label: rgba(96, 165, 250, 0.5);
+
+  /* Glass */
+  --glass-bg: rgba(15, 31, 53, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
-:root {
-  --background: #f0f4f8;
-  --foreground: #1a202c;
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-body: #f1f5f9;
+  --bg-sidebar: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-solid: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-hover-strong: rgba(0, 0, 0, 0.08);
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+
+  /* Borders */
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.15);
+
+  /* Accents */
+  --accent-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
+  --accent-primary: #2563eb;
+  --accent-secondary: #1d4ed8;
+
+  /* Sidebar */
+  --sidebar-text: #475569;
+  --sidebar-active-bg: #2563eb;
+  --sidebar-active-text: #ffffff;
+  --sidebar-label: #94a3b8;
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.06);
 }
 
-/* Consider dark mode as default for the landing page or toggleable. We'll set a dark theme using a class or just override root if preferred, but let's stick to standard Tailwind dark mode or just add a dark class context. */
-.dark {
-  --background: #0f1f35;
-  --foreground: #f8fafc;
-}
+/* ---- Base utility classes ---- */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  /* The font family is injected via next/font in layout.tsx, but this is a fallback */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Scrollbar sutil */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-.dark ::-webkit-scrollbar-track { background: #0f1f35; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-.dark ::-webkit-scrollbar-thumb { background: #1E3A5F; }
+/* Override for common Tailwind text colors in light mode */
+[data-theme="light"] .text-slate-300 { color: #475569 !important; }
+[data-theme="light"] .text-slate-400 { color: #64748b !important; }
+[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
+[data-theme="light"] .text-blue-200 { color: #1d4ed8 !important; }
+[data-theme="light"] .text-blue-300 { color: #2563eb !important; }
+[data-theme="light"] .text-blue-400 { color: #3b82f6 !important; }
 
-/* Custom Animations */
-@keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-/* Glassmorphism Utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* glass-card: base + hover */
+/* Glass card */
 .glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.3s ease-in-out;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-/* Ocultar scrollbar sin perder funcionalidad */
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Scrollbar */
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Fade-in-up para landing */
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+/* KPI gradients dark */
+[data-theme="dark"] .kpi-blue   { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+[data-theme="dark"] .kpi-green  { background: linear-gradient(135deg, #16a34a, #15803d); }
+[data-theme="dark"] .kpi-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+[data-theme="dark"] .kpi-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+
+/* KPI gradients light */
+[data-theme="light"] .kpi-blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+[data-theme="light"] .kpi-green  { background: linear-gradient(135deg, #22c55e, #16a34a); }
+[data-theme="light"] .kpi-indigo { background: linear-gradient(135deg, #818cf8, #6366f1); }
+[data-theme="light"] .kpi-orange { background: linear-gradient(135deg, #fb923c, #f97316); }

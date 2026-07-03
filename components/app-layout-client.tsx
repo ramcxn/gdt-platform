@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
+import { useTheme } from '@/lib/theme-context'
 
 const NAV_GROUPS = [
   { label: 'Operaciones', items: [
@@ -62,9 +63,9 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
   }
 
   return (
-    <aside className="flex flex-col h-full" style={{background:'linear-gradient(180deg,#0f1f35 0%,#1E3A5F 100%)'}}>
+    <aside className="flex flex-col h-full" style={{ background: 'var(--bg-sidebar)' }}>
       {/* Brand */}
-      <div className="px-5 py-5 border-b border-white/10">
+      <div className="px-5 py-5 border-b" style={{ borderColor: 'var(--border-default)' }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,7 +74,7 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
           </div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">GDT Platform</p>
-            <p className="text-blue-300 text-xs">{auth?.empresaNombre || 'Cargando...'}</p>
+            <p className="text-blue-300 text-xs" style={{ color: 'var(--sidebar-text)' }}>{auth?.empresaNombre || 'Cargando...'}</p>
           </div>
         </div>
       </div>
@@ -81,12 +82,16 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
       <nav className="flex-1 px-2 py-3 overflow-y-auto hide-scrollbar space-y-1">
         {NAV_GROUPS.map(group => (
           <div key={group.label}>
-            <p className="px-3 pt-3 pb-1 text-xs font-semibold text-blue-400/50 uppercase tracking-widest">{group.label}</p>
+            <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--sidebar-label)' }}>{group.label}</p>
             {group.items.map(item => {
               const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
               return (
                 <Link key={item.href} href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${active ? 'bg-white/15 text-white font-medium' : 'text-blue-200/80 hover:bg-white/8 hover:text-white'}`}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${active ? 'text-white font-medium' : ''}`}
+                  style={{
+                    background: active ? 'var(--sidebar-active-bg)' : 'transparent',
+                    color: active ? 'var(--sidebar-active-text)' : 'var(--sidebar-text)',
+                  }}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,19 +115,22 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
         </div>
       )}
 
-      <div className="px-3 py-3 border-t border-white/10">
+      <div className="px-3 py-3 border-t" style={{ borderColor: 'var(--border-default)' }}>
         <Link href="/perfil" onClick={() => setSidebarOpen(false)}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+          className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+          style={{ background: 'var(--bg-hover)', '--hover-bg': 'var(--bg-hover-strong)' } as React.CSSProperties}
+        >
           <div className="w-7 h-7 rounded-full bg-blue-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
             {auth?.userName ? auth.userName[0].toUpperCase() : '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-medium truncate">{auth?.userName}</p>
-            <p className="text-blue-300 text-xs truncate">{auth?.userRol || 'Cargando...'}</p>
+            <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{auth?.userName}</p>
+            <p className="text-xs" style={{ color: 'var(--sidebar-text)' }}>{auth?.userRol || 'Cargando...'}</p>
           </div>
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); handleLogout() }}
             title="Cerrar sesión"
-            className="text-blue-300 hover:text-red-400 transition-colors cursor-pointer flex-shrink-0">
+            className="transition-colors cursor-pointer flex-shrink-0"
+            style={{ color: 'var(--sidebar-text)' }}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -135,9 +143,10 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { theme, toggle: toggleTheme } = useTheme()
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0a1526' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-body)' }}>
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:flex-col md:w-64 flex-shrink-0">
         <SidebarContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -149,29 +158,54 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
           <div className="w-56 flex-shrink-0">
             <SidebarContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           </div>
-          <div className="flex-1 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div className="flex-1" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => setSidebarOpen(false)} />
         </div>
       )}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="glass border-b border-white/5 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-10 backdrop-blur-md">
-          <button className="md:hidden p-1.5 rounded-lg hover:bg-white/10 cursor-pointer" onClick={() => setSidebarOpen(true)}>
-            <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Topbar */}
+        <header className="border-b px-4 py-3 flex items-center gap-3 flex-shrink-0 z-10"
+          style={{
+            background: 'var(--glass-bg)',
+            borderColor: 'var(--border-subtle)',
+            backdropFilter: 'blur(12px)',
+          }}>
+          <button className="md:hidden p-1.5 rounded-lg cursor-pointer" style={{ color: 'var(--text-secondary)' }}
+            onClick={() => setSidebarOpen(true)}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+
+          {/* Theme toggle */}
+          <button onClick={toggleTheme}
+            className="p-1.5 rounded-lg cursor-pointer transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+            title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
+            {theme === 'dark' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+
           <div className="flex-1" />
-          <div className="text-xs text-slate-400 font-mono">
+          <div className="text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
             {new Date().toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
           </div>
-          <div className="w-px h-5 bg-white/10" />
+          <div className="w-px h-5" style={{ background: 'var(--border-default)' }} />
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-slate-400">Sistema activo</span>
+            <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Sistema activo</span>
           </div>
         </header>
 
+        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-5">
           {children}
         </main>
