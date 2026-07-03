@@ -60,10 +60,20 @@ export async function middleware(request: NextRequest) {
 
   // Gate de módulos: bloquea acceso directo por URL a módulos no habilitados
   // para la empresa del usuario. Solo corre para rutas que mapean a un módulo
-  // configurable (no /dashboard, /perfil, /api, etc.), y es una sola consulta
-  // indexada por PK (empresa_id, modulo_key) — igual de liviana que el check
-  // de SuperAdmin de arriba.
-  const moduloKey = resolveModuleKeyForPath(pathname)
+  // configurable (no /dashboard, /perfil, /api, etc.).
+  //
+  // IMPORTANTE: se omite para requests de prefetch de Next.js (Link prefetch).
+  // El sidebar ya tiene ~25 links visibles en cada página, y Next dispara un
+  // prefetch (con su propia pasada de middleware) por cada uno apenas monta.
+  // Sin este filtro, una sola vista de página generaba ~25 navegaciones ×
+  // 2 consultas = ~50 llamadas a Supabase en paralelo, lo que saturaba la
+  // función serverless y producía errores intermitentes. La navegación real
+  // (click o URL directa) no manda este header, así que el bloqueo real
+  // sigue vigente; solo se deja de re-verificar contenido que ni siquiera
+  // es visible para el usuario porque el sidebar ya lo ocultó.
+  const isPrefetch = request.headers.get('next-router-prefetch') === '1' || request.headers.get('purpose') === 'prefetch'
+
+  const moduloKey = !isPrefetch ? resolveModuleKeyForPath(pathname) : null
   if (moduloKey) {
     const { data: perfil } = await supabase
       .from('usuarios')
