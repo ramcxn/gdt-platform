@@ -16,6 +16,8 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
   if (!empresa) notFound()
 
   const { data: usuarios } = await supabase.from('usuarios').select('*').eq('empresa_id', params.id).order('nombre')
+  const { data: modulosRows } = await supabase.from('empresa_modulos').select('modulo_key').eq('empresa_id', params.id)
+  const modulosActuales = (modulosRows ?? []).map(m => m.modulo_key)
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -42,7 +44,7 @@ export default async function EmpresaDetailPage({ params }: { params: { id: stri
       </div>
 
       {/* Editar empresa */}
-      <EmpresaForm empresa={empresa} />
+      <EmpresaForm empresa={empresa} modulosActuales={modulosActuales} />
 
       {/* Usuarios de esta empresa */}
       <div className="rounded-xl border border-white/5 overflow-hidden" style={{ background: 'rgba(15,31,53,0.7)' }}>

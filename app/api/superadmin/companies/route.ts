@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildCompanyProvisionSql } from '@/lib/company-provisioning'
+import { CONFIGURABLE_MODULE_KEYS } from '@/lib/modules'
+
+/** Filtra a solo claves de módulo válidas y conocidas por la plataforma. */
+function sanitizeModulos(input: unknown): string[] {
+  if (!Array.isArray(input)) return CONFIGURABLE_MODULE_KEYS
+  const set = new Set(CONFIGURABLE_MODULE_KEYS)
+  return input.filter((k): k is string => typeof k === 'string' && set.has(k))
+}
 
 async function requireSuperAdmin() {
   const serverSupabase = await createClient()
@@ -53,6 +61,14 @@ export async function POST(req: Request) {
 
     if (empresaErr) return NextResponse.json({ error: empresaErr.message }, { status: 400 })
 
+    const modulos = sanitizeModulos(body.modulos)
+    if (modulos.length > 0) {
+      const { error: modulosErr } = await adminSupabase
+        .from('empresa_modulos')
+        .insert(modulos.map(modulo_key => ({ empresa_id: empresa.id, modulo_key })))
+      if (modulosErr) return NextResponse.json({ error: modulosErr.message }, { status: 400 })
+    }
+
     if (body.seed_defaults !== false) {
       await Promise.all([
         adminSupabase.from('ubicaciones_almacen').upsert([{
@@ -94,7 +110,7 @@ export async function POST(req: Request) {
       success: true,
       empresa,
       admin_user_id: adminUserId,
-      sql: buildCompanyProvisionSql({ ...body, seed_defaults: body.seed_defaults !== false }),
+      sql: buildCompanyProvisionSql({ ...body, seed_defaults: body.seed_defaults !== false, modulos }),
     })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'Error interno' }, { status: 500 })
@@ -110,6 +126,20 @@ export async function PATCH(req: Request) {
     if (!body.id) return NextResponse.json({ error: 'ID de empresa requerido' }, { status: 400 })
 
     const adminSupabase = createAdminClient()
+
+    // Actualización exclusiva de módulos (no toca datos generales de la empresa)
+    if (body.modulos !== undefined && body.nombre_comercial === undefined) {
+      const modulos = sanitizeModulos(body.modulos)
+      const { error: delErr } = await adminSupabase.from('empresa_modulos').delete().eq('empresa_id', body.id)
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 400 })
+      if (modulos.length > 0) {
+        const { error: insErr } = await adminSupabase
+          .from('empresa_modulos')
+          .insert(modulos.map(modulo_key => ({ empresa_id: body.id, modulo_key })))
+        if (insErr) return NextResponse.json({ error: insErr.message }, { status: 400 })
+      }
+      return NextResponse.json({ success: true, modulos })
+    }
 
     const { data, error } = await adminSupabase
       .from('empresas')
@@ -130,6 +160,19 @@ export async function PATCH(req: Request) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+    if (body.modulos !== undefined) {
+      const modulos = sanitizeModulos(body.modulos)
+      const { error: delErr } = await adminSupabase.from('empresa_modulos').delete().eq('empresa_id', body.id)
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 400 })
+      if (modulos.length > 0) {
+        const { error: insErr } = await adminSupabase
+          .from('empresa_modulos')
+          .insert(modulos.map(modulo_key => ({ empresa_id: body.id, modulo_key })))
+        if (insErr) return NextResponse.json({ error: insErr.message }, { status: 400 })
+      }
+    }
+
     return NextResponse.json({ success: true, empresa: data })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'Error interno' }, { status: 500 })

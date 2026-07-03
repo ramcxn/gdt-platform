@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { resolveModuleKeyForPath } from '@/lib/modules'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -53,6 +54,34 @@ export async function middleware(request: NextRequest) {
       .single()
     if (perfil?.rol !== 'SuperAdmin') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    return supabaseResponse
+  }
+
+  // Gate de módulos: bloquea acceso directo por URL a módulos no habilitados
+  // para la empresa del usuario. Solo corre para rutas que mapean a un módulo
+  // configurable (no /dashboard, /perfil, /api, etc.), y es una sola consulta
+  // indexada por PK (empresa_id, modulo_key) — igual de liviana que el check
+  // de SuperAdmin de arriba.
+  const moduloKey = resolveModuleKeyForPath(pathname)
+  if (moduloKey) {
+    const { data: perfil } = await supabase
+      .from('usuarios')
+      .select('empresa_id, rol')
+      .eq('id', session.user.id)
+      .single()
+
+    if (perfil && perfil.rol !== 'SuperAdmin' && perfil.empresa_id) {
+      const { data: modulo } = await supabase
+        .from('empresa_modulos')
+        .select('modulo_key')
+        .eq('empresa_id', perfil.empresa_id)
+        .eq('modulo_key', moduloKey)
+        .maybeSingle()
+
+      if (!modulo) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
     }
   }
 

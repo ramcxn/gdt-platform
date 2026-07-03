@@ -1,3 +1,5 @@
+import { CONFIGURABLE_MODULE_KEYS } from './modules'
+
 export type CompanyProvisionInput = {
   nombre_comercial: string
   razon_social?: string
@@ -10,6 +12,7 @@ export type CompanyProvisionInput = {
   numero_ctpat?: string
   fecha_vigencia_ctpat?: string
   seed_defaults?: boolean
+  modulos?: string[]
 }
 
 const nullableSql = (value?: string | null) => {
@@ -23,6 +26,20 @@ export function buildCompanyProvisionSql(input: CompanyProvisionInput) {
   const plan = input.plan || 'Demo'
   const estado = input.estado || 'Activo'
   const seedDefaults = input.seed_defaults ?? true
+  const modulos = (input.modulos && input.modulos.length > 0 ? input.modulos : CONFIGURABLE_MODULE_KEYS)
+    .filter((k): k is string => typeof k === 'string')
+
+  const modulosValues = modulos
+    .map(k => `    (v_empresa_id, '${k.replaceAll("'", "''")}')`)
+    .join(',\n')
+
+  const modulosBlock = modulos.length > 0
+    ? `
+  INSERT INTO public.empresa_modulos (empresa_id, modulo_key)
+  VALUES
+${modulosValues}
+  ON CONFLICT (empresa_id, modulo_key) DO NOTHING;`
+    : ''
 
   const seedBlock = seedDefaults
     ? `
@@ -74,6 +91,7 @@ BEGIN
     ${nullableSql(input.fecha_vigencia_ctpat)}
   )
   RETURNING id INTO v_empresa_id;
+${modulosBlock}
 ${seedBlock}
 
   RAISE NOTICE 'Empresa creada: %', v_empresa_id;

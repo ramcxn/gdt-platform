@@ -2,12 +2,14 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CONFIGURABLE_MODULE_GROUPS, CONFIGURABLE_MODULE_KEYS } from '@/lib/modules'
 
 export default function NuevaEmpresaPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [script, setScript] = useState('')
+  const [modulos, setModulos] = useState<string[]>(CONFIGURABLE_MODULE_KEYS)
   const [form, setForm] = useState({
     nombre_comercial: '', razon_social: '', rfc: '', telefono: '',
     correo_contacto: '', direccion: '', plan: 'Demo', estado: 'Activo',
@@ -19,6 +21,12 @@ export default function NuevaEmpresaPage() {
 
   const set = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }))
 
+  const toggleModulo = (key: string) =>
+    setModulos(prev => prev.includes(key) ? prev.filter(m => m !== key) : [...prev, key])
+
+  const toggleGroup = (keys: string[], allSelected: boolean) =>
+    setModulos(prev => allSelected ? prev.filter(m => !keys.includes(m)) : Array.from(new Set([...prev, ...keys])))
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -28,7 +36,7 @@ export default function NuevaEmpresaPage() {
       const res = await fetch('/api/superadmin/companies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, modulos }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -96,6 +104,47 @@ export default function NuevaEmpresaPage() {
           />
           Crear datos base: ubicación de almacén y zonas de rondín
         </label>
+      </div>
+
+      {/* Módulos habilitados */}
+      <div className="rounded-xl border border-white/5 p-5 space-y-4" style={{ background: 'rgba(15,31,53,0.7)' }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-white font-semibold">Módulos del Sistema</h2>
+            <p className="text-slate-500 text-xs mt-0.5">Selecciona qué módulos podrá utilizar esta empresa. Puedes ajustarlo después.</p>
+          </div>
+          <div className="flex gap-2 text-xs">
+            <button type="button" onClick={() => setModulos(CONFIGURABLE_MODULE_KEYS)}
+              className="text-purple-300 hover:underline">Seleccionar todos</button>
+            <span className="text-slate-600">·</span>
+            <button type="button" onClick={() => setModulos([])}
+              className="text-slate-400 hover:underline">Ninguno</button>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {CONFIGURABLE_MODULE_GROUPS.map(group => {
+            const keys = group.items.map(i => i.key)
+            const allSelected = keys.every(k => modulos.includes(k))
+            return (
+              <div key={group.label} className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(7,17,31,0.5)' }}>
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 uppercase tracking-wide mb-2 cursor-pointer">
+                  <input type="checkbox" checked={allSelected} onChange={() => toggleGroup(keys, allSelected)}
+                    className="h-3.5 w-3.5 rounded border-white/10 bg-[#0f1f35]" />
+                  {group.label}
+                </label>
+                <div className="space-y-1.5">
+                  {group.items.map(item => (
+                    <label key={item.key} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                      <input type="checkbox" checked={modulos.includes(item.key)} onChange={() => toggleModulo(item.key)}
+                        className="h-4 w-4 rounded border-white/10 bg-[#0f1f35]" />
+                      {item.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Usuario admin inicial */}

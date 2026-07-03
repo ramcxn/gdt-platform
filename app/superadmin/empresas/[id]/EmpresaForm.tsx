@@ -2,11 +2,15 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CONFIGURABLE_MODULE_GROUPS, CONFIGURABLE_MODULE_KEYS } from '@/lib/modules'
 
-export default function EmpresaForm({ empresa }: { empresa: any }) {
+export default function EmpresaForm({ empresa, modulosActuales }: { empresa: any; modulosActuales: string[] }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+  const [modulos, setModulos] = useState<string[]>(modulosActuales)
+  const [savingModulos, setSavingModulos] = useState(false)
+  const [modulosMsg, setModulosMsg] = useState('')
   const [form, setForm] = useState({
     nombre_comercial: empresa.nombre_comercial ?? '',
     razon_social: empresa.razon_social ?? '',
@@ -21,6 +25,26 @@ export default function EmpresaForm({ empresa }: { empresa: any }) {
   })
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))
+
+  const toggleModulo = (key: string) =>
+    setModulos(prev => prev.includes(key) ? prev.filter(m => m !== key) : [...prev, key])
+
+  const toggleGroup = (keys: string[], allSelected: boolean) =>
+    setModulos(prev => allSelected ? prev.filter(m => !keys.includes(m)) : Array.from(new Set([...prev, ...keys])))
+
+  const handleSaveModulos = async () => {
+    setSavingModulos(true)
+    setModulosMsg('')
+    const res = await fetch('/api/superadmin/companies', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: empresa.id, modulos }),
+    })
+    const json = await res.json()
+    setSavingModulos(false)
+    if (!res.ok) setModulosMsg('Error: ' + (json.error ?? 'No se pudo guardar'))
+    else { setModulosMsg('✓ Módulos actualizados'); router.refresh() }
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,6 +79,7 @@ export default function EmpresaForm({ empresa }: { empresa: any }) {
   )
 
   return (
+    <div className="space-y-6">
     <form onSubmit={handleSave} className="rounded-xl border border-white/5 p-5 space-y-4" style={{ background: 'rgba(15,31,53,0.7)' }}>
       <h2 className="text-white font-semibold">Editar Información</h2>
       {msg && <div className={`p-2 rounded text-sm ${msg.startsWith('Error') ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>{msg}</div>}
@@ -88,5 +113,49 @@ export default function EmpresaForm({ empresa }: { empresa: any }) {
         {saving ? 'Guardando...' : 'Guardar Cambios'}
       </button>
     </form>
+
+    <div className="rounded-xl border border-white/5 p-5 space-y-4" style={{ background: 'rgba(15,31,53,0.7)' }}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-white font-semibold">Módulos del Sistema</h2>
+        <div className="flex gap-2 text-xs">
+          <button type="button" onClick={() => setModulos(CONFIGURABLE_MODULE_KEYS)}
+            className="text-purple-300 hover:underline">Seleccionar todos</button>
+          <span className="text-slate-600">·</span>
+          <button type="button" onClick={() => setModulos([])}
+            className="text-slate-400 hover:underline">Ninguno</button>
+        </div>
+      </div>
+      {modulosMsg && <div className={`p-2 rounded text-sm ${modulosMsg.startsWith('Error') ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>{modulosMsg}</div>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {CONFIGURABLE_MODULE_GROUPS.map(group => {
+          const keys = group.items.map(i => i.key)
+          const allSelected = keys.every(k => modulos.includes(k))
+          return (
+            <div key={group.label} className="rounded-lg border border-white/5 p-3" style={{ background: 'rgba(7,17,31,0.5)' }}>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 uppercase tracking-wide mb-2 cursor-pointer">
+                <input type="checkbox" checked={allSelected} onChange={() => toggleGroup(keys, allSelected)}
+                  className="h-3.5 w-3.5 rounded border-white/10 bg-[#0f1f35]" />
+                {group.label}
+              </label>
+              <div className="space-y-1.5">
+                {group.items.map(item => (
+                  <label key={item.key} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                    <input type="checkbox" checked={modulos.includes(item.key)} onChange={() => toggleModulo(item.key)}
+                      className="h-4 w-4 rounded border-white/10 bg-[#0f1f35]" />
+                    {item.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <button type="button" onClick={handleSaveModulos} disabled={savingModulos}
+        className="px-5 py-2 rounded-lg text-white text-sm font-semibold disabled:opacity-50"
+        style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}>
+        {savingModulos ? 'Guardando...' : 'Guardar Módulos'}
+      </button>
+    </div>
+    </div>
   )
 }

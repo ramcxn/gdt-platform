@@ -10,6 +10,8 @@ export interface AuthState {
   userRol: string
   empresaNombre: string
   isSuperAdmin: boolean
+  /** Claves de módulos habilitados para la empresa del usuario. null = sin restricción (SuperAdmin). */
+  enabledModules: string[] | null
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -48,6 +50,7 @@ export function AuthProvider({
       if (!perfil) return
 
       let empresaNombre = ''
+      let enabledModules: string[] | null = null
       if (perfil.empresa_id) {
         const { data: emp } = await supabase.current
           .from('empresas')
@@ -55,6 +58,14 @@ export function AuthProvider({
           .eq('id', perfil.empresa_id)
           .single()
         if (emp) empresaNombre = emp.nombre_comercial
+
+        if (perfil.rol !== 'SuperAdmin') {
+          const { data: mods } = await supabase.current
+            .from('empresa_modulos')
+            .select('modulo_key')
+            .eq('empresa_id', perfil.empresa_id)
+          enabledModules = (mods ?? []).map(m => m.modulo_key)
+        }
       }
 
       setAuth({
@@ -63,6 +74,7 @@ export function AuthProvider({
         userRol: perfil.rol ?? '',
         empresaNombre,
         isSuperAdmin: perfil.rol === 'SuperAdmin',
+        enabledModules,
       })
     })
   }, [router])

@@ -42,3 +42,17 @@ export const getSessionContext = cache(async () => {
   const perfil = await getUserProfile(user.id)
   return { user, perfil, empresaId: perfil?.empresa_id ?? null }
 })
+
+/**
+ * Claves de módulos habilitados para una empresa (cacheado por request).
+ * SuperAdmin o usuarios sin empresa devuelven null = sin restricción.
+ */
+export const getEnabledModules = cache(async (empresaId: string | null, rol?: string | null): Promise<string[] | null> => {
+  if (!empresaId || rol === 'SuperAdmin') return null
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('empresa_modulos')
+    .select('modulo_key')
+    .eq('empresa_id', empresaId)
+  return (data ?? []).map(d => d.modulo_key)
+})
