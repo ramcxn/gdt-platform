@@ -1,26 +1,58 @@
 import { getSessionContext } from '@/lib/supabase/server-utils'
 import Link from 'next/link'
 import type { InspeccionCTpat } from '@/lib/types'
-import { ClipboardList, Clock, ArrowRightCircle, ArrowLeftCircle, AlertTriangle, Truck, UserCheck, ShieldCheck } from 'lucide-react'
+import {
+  ClipboardList,
+  Clock,
+  ArrowRightCircle,
+  ArrowLeftCircle,
+  AlertTriangle,
+  Truck,
+  UserCheck,
+  ShieldCheck,
+  Activity,
+  TrendingUp,
+} from 'lucide-react'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
-// ---- Streamed sub-components ----
+// ─── Streamed: Greeting + Welcome Banner ──────────────────────────
 
-async function Greeting() {
+async function WelcomeBanner() {
   const { perfil } = await getSessionContext()
   const hora = new Date().getHours()
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches'
+  const nombre = perfil?.nombre?.split(' ')[0] ?? 'Usuario'
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{saludo}, {perfil?.nombre?.split(' ')[0]}</h1>
-      <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>Resumen operativo del sistema CTPAT</p>
+    <div className="welcome-banner">
+      <div className="relative z-10">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold">
+              {saludo}, {nombre}
+            </h1>
+            <p className="text-white/70 text-sm mt-0.5">
+              Resumen operativo del sistema CTPAT
+            </p>
+            <div className="flex items-center gap-2 mt-2 text-white/50 text-xs">
+              <Activity className="w-3.5 h-3.5" />
+              <span>Panel actualizado en tiempo real</span>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 text-xs text-white/80">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Hoy</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
-async function StatsCards() {
+// ─── Streamed: Stats Cards ────────────────────────────────────────
+
+async function StatsCardsGrid() {
   const { empresaId } = await getSessionContext()
   const supabase = await createClient()
 
@@ -30,28 +62,66 @@ async function StatsCards() {
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Total inspecciones" value={s?.total ?? 0} icon={<ClipboardList className="w-6 h-6" />} kpiClass="kpi-blue" />
-        <KpiCard label="Inspecciones hoy" value={s?.hoy ?? 0} icon={<Clock className="w-6 h-6" />} kpiClass="kpi-green" />
-        <KpiCard label="Entradas" value={s?.entradas ?? 0} icon={<ArrowRightCircle className="w-6 h-6" />} kpiClass="kpi-indigo" />
-        <KpiCard label="Salidas" value={s?.salidas ?? 0} icon={<ArrowLeftCircle className="w-6 h-6" />} kpiClass="kpi-orange" />
+        <KpiCard
+          label="Total inspecciones"
+          value={s?.total ?? 0}
+          icon={<ClipboardList className="w-5 h-5" />}
+          kpiClass="kpi-blue"
+          trend="+ históricas"
+        />
+        <KpiCard
+          label="Inspecciones hoy"
+          value={s?.hoy ?? 0}
+          icon={<Clock className="w-5 h-5" />}
+          kpiClass="kpi-green"
+          trend="en el día"
+        />
+        <KpiCard
+          label="Entradas"
+          value={s?.entradas ?? 0}
+          icon={<ArrowRightCircle className="w-5 h-5" />}
+          kpiClass="kpi-indigo"
+          trend="unidades ingresadas"
+        />
+        <KpiCard
+          label="Salidas"
+          value={s?.salidas ?? 0}
+          icon={<ArrowLeftCircle className="w-5 h-5" />}
+          kpiClass="kpi-teal"
+          trend="unidades despachadas"
+        />
       </div>
 
+      {/* Alerta de daños */}
       {(s?.danos ?? 0) > 0 && (
-        <div className="border rounded-xl p-4 flex items-center gap-3 glass-card"
-          style={{ borderColor: 'rgba(251,191,36,0.2)' }}>
-          <AlertTriangle className="w-8 h-8 text-amber-500 flex-shrink-0" />
-          <div>
-            <p className="text-amber-300 font-semibold text-sm">{s?.danos ?? 0} unidad{(s?.danos ?? 0) > 1 ? 'es' : ''} con daños físicos reportados</p>
-            <p className="text-amber-200/70 text-xs mt-0.5">Revisar inspecciones con daños antes de asignar rutas.</p>
+        <div
+          className="rounded-xl p-4 flex items-center gap-3 card-app"
+          style={{ borderLeft: '4px solid #f59e0b' }}
+        >
+          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-amber-400" />
           </div>
-          <Link href="/inspecciones" className="ml-auto text-xs text-amber-300 font-medium border border-amber-500/30 px-3 py-1.5 rounded-lg hover:bg-amber-500/20 transition-colors">
-            Ver →
+          <div className="flex-1">
+            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+              {s?.danos ?? 0} unidad{(s?.danos ?? 0) > 1 ? 'es' : ''} con daños físicos reportados
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+              Revisar inspecciones con daños antes de asignar rutas.
+            </p>
+          </div>
+          <Link
+            href="/inspecciones"
+            className="btn-accent text-xs whitespace-nowrap"
+          >
+            Ver inspecciones
           </Link>
         </div>
       )}
     </>
   )
 }
+
+// ─── Streamed: Recent Inspections ─────────────────────────────────
 
 async function RecentInspections() {
   const { empresaId } = await getSessionContext()
@@ -65,34 +135,89 @@ async function RecentInspections() {
     .limit(5)
 
   return (
-    <div className="md:col-span-2 rounded-xl overflow-hidden glass-card" style={{ borderColor: 'var(--border-subtle)' }}>
-      <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
-        <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>Últimas inspecciones</h2>
-        <Link href="/inspecciones" className="text-xs" style={{ color: 'var(--accent-primary)' }}>Ver todas →</Link>
+    <div className="md:col-span-2 rounded-xl overflow-hidden card-app">
+      <div
+        className="px-5 py-3.5 border-b flex items-center justify-between"
+        style={{ borderColor: 'var(--border-subtle)' }}
+      >
+        <div className="flex items-center gap-2">
+          <ClipboardList className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Últimas inspecciones
+          </h2>
+        </div>
+        <Link
+          href="/inspecciones"
+          className="text-xs font-medium flex items-center gap-1"
+          style={{ color: 'var(--accent-primary)' }}
+        >
+          Ver todas
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
       </div>
-      <div className="divide-y" style={{ borderColor: 'var(--border-subtle)', '--divide-color': 'var(--border-subtle)' } as React.CSSProperties}>
-        {recientes && recientes.length > 0 ? (recientes as InspeccionCTpat[]).map((insp) => (
-          <Link key={insp.id} href={`/inspecciones/${insp.id}`}
-            className="flex items-center gap-3 px-5 py-3 transition-colors"
-            style={{ background: 'transparent' }}>
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${insp.tipo_movimiento === 'Entrada' ? 'bg-green-400' : 'bg-red-400'}`} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                {insp.tracto_numero} — {insp.operador_nombre?.split(' ').slice(0, 2).join(' ')}
-              </p>
-              <p className="text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>{insp.cliente || 'Sin cliente'} • {insp.origen} → {insp.destino}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${insp.tipo_movimiento === 'Entrada' ? 'bg-green-400/20 text-green-300' : 'bg-red-400/20 text-red-300'}`}>
-                {insp.tipo_movimiento}
-              </span>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                {new Date(insp.fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          </Link>
-        )) : (
-          <div className="px-5 py-8 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
+      <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+        {recientes && recientes.length > 0 ? (
+          (recientes as InspeccionCTpat[]).map((insp) => (
+            <Link
+              key={insp.id}
+              href={`/inspecciones/${insp.id}`}
+              className="flex items-center gap-3 px-5 py-3.5 transition-all"
+              style={{ background: 'transparent' }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent'
+              }}
+            >
+              {/* Status dot */}
+              <span
+                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                  insp.tipo_movimiento === 'Entrada' ? 'bg-green-400' : 'bg-red-400'
+                }`}
+              />
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                  {insp.tracto_numero}
+                  {insp.operador_nombre
+                    ? ` — ${insp.operador_nombre.split(' ').slice(0, 2).join(' ')}`
+                    : ''}
+                </p>
+                <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                  {insp.cliente || 'Sin cliente'} · {insp.origen} → {insp.destino}
+                </p>
+              </div>
+              {/* Badge + time */}
+              <div className="text-right flex-shrink-0">
+                <span
+                  className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
+                    insp.tipo_movimiento === 'Entrada'
+                      ? 'bg-green-400/15 text-green-300'
+                      : 'bg-red-400/15 text-red-300'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      insp.tipo_movimiento === 'Entrada' ? 'bg-green-400' : 'bg-red-400'
+                    }`}
+                  />
+                  {insp.tipo_movimiento}
+                </span>
+                <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                  {new Date(insp.fecha).toLocaleTimeString('es-MX', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <div className="px-5 py-10 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
+            <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-40" />
             No hay inspecciones registradas aún.
           </div>
         )}
@@ -101,65 +226,80 @@ async function RecentInspections() {
   )
 }
 
-// ---- Skeleton loaders ----
+// ─── Skeleton loaders ─────────────────────────────────────────────
 
 function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-24 rounded-xl" style={{ background: 'var(--bg-hover)', borderColor: 'var(--border-subtle)' }} />
+        <div key={i} className="h-24 rounded-xl skeleton" />
       ))}
     </div>
   )
 }
 
-// ---- Main page ----
+// ─── Main page ────────────────────────────────────────────────────
 
 export default async function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <Suspense fallback={<div className="space-y-2 animate-pulse"><div className="h-7 w-64 rounded-lg" style={{ background: 'var(--bg-hover)' }} /><div className="h-4 w-40 rounded" style={{ background: 'var(--bg-hover)' }} /></div>}>
-        <Greeting />
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Welcome Banner */}
+      <Suspense
+        fallback={
+          <div className="h-28 rounded-xl skeleton animate-pulse" />
+        }
+      >
+        <WelcomeBanner />
       </Suspense>
 
+      {/* Stats Cards */}
       <Suspense fallback={<StatsSkeleton />}>
-        <StatsCards />
+        <StatsCardsGrid />
       </Suspense>
 
+      {/* Bottom section: Quick Actions + Recent */}
       <div className="grid md:grid-cols-3 gap-5">
-        {/* Acciones rápidas */}
-        <div className="rounded-xl p-5 space-y-3 glass-card" style={{ borderColor: 'var(--border-subtle)' }}>
-          <h2 className="text-sm font-semibold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>Acciones rápidas</h2>
-          <Link href="/inspecciones/nueva"
-            className="flex items-center gap-3 p-3 rounded-lg border-2 border-dashed transition-all group"
-            style={{ borderColor: 'var(--border-default)' }}>
-            <Truck className="w-7 h-7 flex-shrink-0" style={{ color: 'var(--accent-primary)' }} />
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Nueva inspección CTPAT</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Registrar entrada o salida de unidad</p>
-            </div>
-          </Link>
-          <Link href="/acceso"
-            className="flex items-center gap-3 p-3 rounded-lg transition-all"
-            style={{ background: 'var(--bg-hover)' }}>
-            <UserCheck className="w-7 h-7 flex-shrink-0" style={{ color: 'var(--text-tertiary)' }} />
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Control de acceso</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Registrar empleado o proveedor</p>
-            </div>
-          </Link>
-          <Link href="/rondines"
-            className="flex items-center gap-3 p-3 rounded-lg transition-all"
-            style={{ background: 'var(--bg-hover)' }}>
-            <ShieldCheck className="w-7 h-7 flex-shrink-0" style={{ color: 'var(--text-tertiary)' }} />
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Iniciar rondín</p>
-              <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Recorrido de seguridad por zonas</p>
-            </div>
-          </Link>
+        {/* Quick Actions — colorful cards */}
+        <div className="rounded-xl p-5 space-y-3 card-app">
+          <div className="flex items-center gap-2 mb-1">
+            <Activity className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
+            <h2
+              className="text-sm font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              Acciones rápidas
+            </h2>
+          </div>
+
+          <QuickActionCard
+            href="/inspecciones/nueva"
+            icon={<Truck className="w-5 h-5" />}
+            title="Nueva inspección CTPAT"
+            desc="Registrar entrada o salida de unidad"
+            colorClass="action-blue"
+          />
+          <QuickActionCard
+            href="/acceso"
+            icon={<UserCheck className="w-5 h-5" />}
+            title="Control de acceso"
+            desc="Registrar empleado o proveedor"
+            colorClass="action-teal"
+          />
+          <QuickActionCard
+            href="/rondines"
+            icon={<ShieldCheck className="w-5 h-5" />}
+            title="Iniciar rondín"
+            desc="Recorrido de seguridad por zonas"
+            colorClass="action-purple"
+          />
         </div>
 
-        <Suspense fallback={<div className="md:col-span-2 h-64 rounded-xl animate-pulse" style={{ background: 'var(--bg-hover)', borderColor: 'var(--border-subtle)' }} />}>
+        {/* Recent Inspections */}
+        <Suspense
+          fallback={
+            <div className="md:col-span-2 h-64 rounded-xl skeleton animate-pulse" />
+          }
+        >
           <RecentInspections />
         </Suspense>
       </div>
@@ -167,16 +307,66 @@ export default async function DashboardPage() {
   )
 }
 
-// ---- KPI Card ----
+// ─── KPI Card ─────────────────────────────────────────────────────
 
-function KpiCard({ label, value, icon, kpiClass }: { label: string; value: number; icon: React.ReactNode; kpiClass: string }) {
+function KpiCard({
+  label,
+  value,
+  icon,
+  kpiClass,
+  trend,
+}: {
+  label: string
+  value: number
+  icon: React.ReactNode
+  kpiClass: string
+  trend?: string
+}) {
   return (
-    <div className={`${kpiClass} rounded-xl p-4 text-white shadow-sm`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-white/90">{icon}</span>
+    <div className={`${kpiClass} rounded-xl p-4 text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-white/80">{icon}</span>
+        <span className="inline-flex items-center gap-1 text-[10px] text-white/60 bg-white/10 rounded-full px-2 py-0.5">
+          <span className="w-1 h-1 rounded-full bg-white/60" />
+          {trend ?? ''}
+        </span>
       </div>
-      <p className="text-3xl font-bold">{value}</p>
-      <p className="text-xs opacity-80 mt-1">{label}</p>
+      <p className="text-2xl md:text-3xl font-bold tracking-tight">{value.toLocaleString()}</p>
+      <p className="text-xs text-white/70 mt-1 font-medium">{label}</p>
     </div>
+  )
+}
+
+// ─── Quick Action Card ────────────────────────────────────────────
+
+function QuickActionCard({
+  href,
+  icon,
+  title,
+  desc,
+  colorClass,
+}: {
+  href: string
+  icon: React.ReactNode
+  title: string
+  desc: string
+  colorClass: string
+}) {
+  return (
+    <Link
+      href={href}
+      className={`${colorClass} flex items-center gap-4 p-4 rounded-xl text-white transition-all hover:scale-[1.02] hover:shadow-md`}
+    >
+      <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs text-white/70 mt-0.5">{desc}</p>
+      </div>
+      <svg className="w-4 h-4 text-white/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
   )
 }
