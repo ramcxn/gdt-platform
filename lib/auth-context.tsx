@@ -43,7 +43,7 @@ export function AuthProvider({
       if (!user) { router.push('/login'); return }
       const { data: perfil } = await supabase.current
         .from('usuarios')
-        .select('nombre, empresa_id, rol')
+        .select('nombre, empresa_id, rol, restriccion_modulos')
         .eq('id', user.id)
         .single()
 
@@ -64,7 +64,18 @@ export function AuthProvider({
             .from('empresa_modulos')
             .select('modulo_key')
             .eq('empresa_id', perfil.empresa_id)
-          enabledModules = (mods ?? []).map(m => m.modulo_key)
+          const empresaKeys = (mods ?? []).map(m => m.modulo_key)
+
+          if (perfil.restriccion_modulos) {
+            const { data: userMods } = await supabase.current
+              .from('usuario_modulos')
+              .select('modulo_key')
+              .eq('usuario_id', user.id)
+            const userKeys = new Set((userMods ?? []).map(m => m.modulo_key))
+            enabledModules = empresaKeys.filter(k => userKeys.has(k))
+          } else {
+            enabledModules = empresaKeys
+          }
         }
       }
 

@@ -2,6 +2,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CONFIGURABLE_MODULE_GROUPS } from '@/lib/modules'
 
 const ROL_COLOR: Record<string,string> = {
   SuperAdmin: 'bg-red-500/10 text-red-400 border-red-500/20',
@@ -17,8 +18,9 @@ function Badge({ text, cls }: { text: string; cls: string }) {
   return <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${cls}`}>{text}</span>
 }
 
-export default function UsuariosManager({ usuarios, currentUserId, currentRol, canManage }: {
+export default function UsuariosManager({ usuarios, currentUserId, currentRol, canManage, empresaModulos, usuarioModulosMap }: {
   usuarios: any[], currentUserId: string, currentRol: string, canManage: boolean
+  empresaModulos: string[], usuarioModulosMap: Record<string, string[]>
 }) {
   const router = useRouter()
   const [showInvite, setShowInvite] = useState(false)
@@ -26,6 +28,22 @@ export default function UsuariosManager({ usuarios, currentUserId, currentRol, c
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
   const [inviteForm, setInviteForm] = useState({ nombre: '', email: '', password: '', rol: 'Operador' })
+  const [modRestriccion, setModRestriccion] = useState(false)
+  const [modKeys, setModKeys] = useState<string[]>([])
+
+  // Grupos de módulos que la empresa tiene habilitados (solo esos tiene sentido asignar por usuario)
+  const asignableGroups = CONFIGURABLE_MODULE_GROUPS
+    .map(g => ({ label: g.label, items: g.items.filter(i => empresaModulos.includes(i.key)) }))
+    .filter(g => g.items.length > 0)
+
+  const openEdit = (u: any) => {
+    setEditUser(u)
+    setModRestriccion(!!u.restriccion_modulos)
+    setModKeys(usuarioModulosMap[u.id] ?? [])
+  }
+
+  const toggleModKey = (key: string) =>
+    setModKeys(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
 
   const stats = [
     { icon: '👤', label: 'Total', value: usuarios.length },
@@ -115,6 +133,11 @@ export default function UsuariosManager({ usuarios, currentUserId, currentRol, c
                     </div>
                     <span className="text-white font-medium">{u.nombre}</span>
                     {u.id === currentUserId && <span className="text-xs text-slate-500">(tú)</span>}
+                    {u.restriccion_modulos && (
+                      <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
+                        Módulos limitados
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-slate-400">{u.email ?? '—'}</td>
@@ -130,7 +153,7 @@ export default function UsuariosManager({ usuarios, currentUserId, currentRol, c
                 {canManage && (
                   <td className="px-4 py-3">
                     {u.id !== currentUserId && (
-                      <button onClick={() => setEditUser(u)}
+                      <button onClick={() => openEdit(u)}
                         className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                         Editar
                       </button>
@@ -188,7 +211,7 @@ export default function UsuariosManager({ usuarios, currentUserId, currentRol, c
       {/* Modal Editar Usuario */}
       {editUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-          <div className="w-full max-w-sm rounded-2xl border border-white/10 p-6 space-y-4" style={{ background: '#0f1f35' }}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 p-6 space-y-4" style={{ background: '#0f1f35' }}>
             <h2 className="text-white font-bold text-lg">Editar: {editUser.nombre}</h2>
             <div className="space-y-3">
               <div>
@@ -213,12 +236,53 @@ export default function UsuariosManager({ usuarios, currentUserId, currentRol, c
                 </button>
               </div>
             </div>
+
+            {/* Módulos del usuario */}
+            <div className="rounded-lg border border-white/5 p-3 space-y-3" style={{ background: 'rgba(7,17,31,0.5)' }}>
+              <label className="flex items-center gap-2 text-sm text-slate-200 cursor-pointer">
+                <input type="checkbox" checked={modRestriccion} onChange={e => setModRestriccion(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/10 bg-[#0f1f35]" />
+                Restringir módulos para este usuario
+              </label>
+              <p className="text-xs text-slate-500">
+                {modRestriccion
+                  ? 'Solo verá los módulos marcados abajo (de los que ya tiene habilitados la empresa).'
+                  : 'Sin marcar: el usuario ve todos los módulos habilitados para la empresa.'}
+              </p>
+              {modRestriccion && (
+                asignableGroups.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+                    {asignableGroups.map(group => (
+                      <div key={group.label}>
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{group.label}</p>
+                        <div className="space-y-1">
+                          {group.items.map(item => (
+                            <label key={item.key} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                              <input type="checkbox" checked={modKeys.includes(item.key)} onChange={() => toggleModKey(item.key)}
+                                className="h-3.5 w-3.5 rounded border-white/10 bg-[#0f1f35]" />
+                              {item.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-amber-400">La empresa no tiene módulos habilitados todavía.</p>
+                )
+              )}
+            </div>
+
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => {
                   const nombre = (document.getElementById('edit-nombre') as HTMLInputElement)?.value
                   const rol = (document.getElementById('edit-rol') as HTMLSelectElement)?.value
-                  handleUpdateUser(editUser.id, { nombre, rol })
+                  handleUpdateUser(editUser.id, {
+                    nombre, rol,
+                    restriccion_modulos: modRestriccion,
+                    modulos: modRestriccion ? modKeys : [],
+                  })
                 }}
                 disabled={saving}
                 className="flex-1 py-2 rounded-lg text-white text-sm font-semibold disabled:opacity-50"

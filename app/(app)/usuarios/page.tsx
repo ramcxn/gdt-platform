@@ -14,6 +14,18 @@ export default async function UsuariosPage() {
     .eq('empresa_id', eid)
     .order('nombre')
 
+  const usuarioIds = (rows ?? []).map(u => u.id)
+  const [{ data: empresaModulosRows }, { data: usuarioModulosRows }] = await Promise.all([
+    eid ? supabase.from('empresa_modulos').select('modulo_key').eq('empresa_id', eid) : Promise.resolve({ data: [] as any[] }),
+    usuarioIds.length > 0 ? supabase.from('usuario_modulos').select('usuario_id, modulo_key').in('usuario_id', usuarioIds) : Promise.resolve({ data: [] as any[] }),
+  ])
+
+  const empresaModulos = (empresaModulosRows ?? []).map(m => m.modulo_key)
+  const usuarioModulosMap: Record<string, string[]> = {}
+  for (const row of usuarioModulosRows ?? []) {
+    (usuarioModulosMap[row.usuario_id] ??= []).push(row.modulo_key)
+  }
+
   const canManage = ['SuperAdmin', 'Admin_Empresa'].includes(perfil.rol ?? '')
 
   return (
@@ -31,6 +43,8 @@ export default async function UsuariosPage() {
         currentUserId={user.id}
         currentRol={perfil.rol ?? 'Operador'}
         canManage={canManage}
+        empresaModulos={empresaModulos}
+        usuarioModulosMap={usuarioModulosMap}
       />
     </div>
   )

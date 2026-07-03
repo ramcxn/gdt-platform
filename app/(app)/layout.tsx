@@ -8,7 +8,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { user, perfil, empresaId } = await getSessionContext()
 
   const [empresaNombre, enabledModules] = empresaId
-    ? await Promise.all([getEmpresaNombre(empresaId), getEnabledModules(empresaId, perfil?.rol)])
+    ? await Promise.all([
+        getEmpresaNombre(empresaId),
+        getEnabledModules(empresaId, perfil?.rol, user?.id, perfil?.restriccion_modulos),
+      ])
     : ['', null] as const
 
   const initial: AuthState | null = user && perfil

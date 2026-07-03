@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
   if (moduloKey) {
     const { data: perfil } = await supabase
       .from('usuarios')
-      .select('empresa_id, rol')
+      .select('empresa_id, rol, restriccion_modulos')
       .eq('id', session.user.id)
       .single()
 
@@ -81,6 +81,21 @@ export async function middleware(request: NextRequest) {
 
       if (!modulo) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+
+      // Capa adicional: si el usuario tiene su propia restricción de módulos,
+      // debe estar también en su lista (subconjunto de lo que la empresa habilitó).
+      if (perfil.restriccion_modulos) {
+        const { data: usuarioModulo } = await supabase
+          .from('usuario_modulos')
+          .select('modulo_key')
+          .eq('usuario_id', session.user.id)
+          .eq('modulo_key', moduloKey)
+          .maybeSingle()
+
+        if (!usuarioModulo) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
       }
     }
   }

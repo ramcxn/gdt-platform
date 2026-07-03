@@ -2,6 +2,7 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { CONFIGURABLE_MODULE_KEYS } from '@/lib/modules'
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
     }
 
-    const { user_id, nombre, rol, activo } = await req.json()
+    const { user_id, nombre, rol, activo, restriccion_modulos, modulos } = await req.json()
     if (!user_id) return NextResponse.json({ error: 'user_id requerido' }, { status: 400 })
 
     const adminSupabase = createAdminClient(
@@ -44,9 +45,27 @@ export async function POST(req: Request) {
     if (nombre !== undefined) updates.nombre = nombre
     if (rol !== undefined) updates.rol = rol
     if (activo !== undefined) updates.activo = activo
+    if (restriccion_modulos !== undefined) updates.restriccion_modulos = restriccion_modulos
 
-    const { error } = await adminSupabase.from('usuarios').update(updates).eq('id', user_id)
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+    if (Object.keys(updates).length > 0) {
+      const { error } = await adminSupabase.from('usuarios').update(updates).eq('id', user_id)
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    if (modulos !== undefined) {
+      const set = new Set(CONFIGURABLE_MODULE_KEYS)
+      const sanitized = Array.isArray(modulos) ? modulos.filter((k): k is string => typeof k === 'string' && set.has(k)) : []
+
+      const { error: delErr } = await adminSupabase.from('usuario_modulos').delete().eq('usuario_id', user_id)
+      if (delErr) return NextResponse.json({ error: delErr.message }, { status: 400 })
+
+      if (sanitized.length > 0) {
+        const { error: insErr } = await adminSupabase
+          .from('usuario_modulos')
+          .insert(sanitized.map(modulo_key => ({ usuario_id: user_id, modulo_key })))
+        if (insErr) return NextResponse.json({ error: insErr.message }, { status: 400 })
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch (e: any) {
