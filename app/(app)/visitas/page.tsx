@@ -8,7 +8,7 @@ const tipoColor: Record<string,string> = { Visita:'slate', Proveedor:'blue', Cli
 
 export default async function VisitasPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
   const eid = perfil?.empresa_id
   const { data: rows } = await supabase.from('visitas_proveedores').select('*').eq('empresa_id', eid).order('created_at', { ascending: false }).limit(50)

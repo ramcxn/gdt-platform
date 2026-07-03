@@ -6,7 +6,7 @@ function Badge({ text, color }: { text: string; color: string }) {
 const eColor: Record<string,string> = { Operativo:'green', En_Reparacion:'amber', Dado_de_Baja:'red' }
 export default async function InventarioPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
   const eid = perfil?.empresa_id
   const { data: rows } = await supabase.from('inventario_equipo').select('*').eq('empresa_id', eid).order('nombre')

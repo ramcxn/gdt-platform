@@ -9,7 +9,7 @@ const estadoColor: Record<string,string> = { Pendiente:'amber', Aprobada:'blue',
 
 export default async function LiquidacionesPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
   const eid = perfil?.empresa_id
 

@@ -19,21 +19,22 @@ async function getStats(empresaId: string) {
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   if (!user) return null
 
   const { data: perfil } = await supabase.from('usuarios').select('nombre,empresa_id').eq('id', user.id).single()
   const empresaId = perfil?.empresa_id
 
-  const stats = empresaId ? await getStats(empresaId) : { total: 0, hoy: 0, entradas: 0, salidas: 0, danos: 0 }
-
-  // Últimas inspecciones
-  const { data: recientes } = await supabase
-    .from('inspecciones_ctpat')
-    .select('*')
-    .eq('empresa_id', empresaId)
-    .order('fecha', { ascending: false })
-    .limit(5)
+  // Stats y últimas inspecciones en paralelo
+  const [stats, { data: recientes }] = await Promise.all([
+    empresaId ? getStats(empresaId) : Promise.resolve({ total: 0, hoy: 0, entradas: 0, salidas: 0, danos: 0 }),
+    supabase
+      .from('inspecciones_ctpat')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .order('fecha', { ascending: false })
+      .limit(5),
+  ])
 
   const hora = new Date().getHours()
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches'

@@ -22,24 +22,30 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // Lectura de sesión desde la cookie (sin llamada de red).
+  // La protección real de datos la garantiza RLS en Supabase; este gate solo decide redirecciones.
+  const { data: { session } } = await supabase.auth.getSession()
   const { pathname } = request.nextUrl
 
   // Rutas públicas
   if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/invite') || pathname === '/') {
-    if (user && pathname === '/login') {
+    if (session && pathname === '/login') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
     return supabaseResponse
   }
 
   // Sin sesión → login
-  if (!user) {
+  if (!session) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Protección rutas SuperAdmin
+  // Protección rutas SuperAdmin: aquí sí validamos contra el servidor
   if (pathname.startsWith('/superadmin')) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
     const { data: perfil } = await supabase
       .from('usuarios')
       .select('rol')

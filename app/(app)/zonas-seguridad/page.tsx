@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export default async function ZonasPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
   const eid = perfil?.empresa_id
   const { data: zonas } = await supabase.from('zonas_rondin').select('*').eq('empresa_id', eid).order('nombre')

@@ -5,7 +5,7 @@ import { AlertTriangle, Lock, CheckCircle, ClipboardList } from 'lucide-react'
 
 export default async function InspeccionesPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   if (!user) return null
 
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()

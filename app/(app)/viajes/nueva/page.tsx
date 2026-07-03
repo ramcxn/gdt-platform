@@ -29,7 +29,8 @@ export default function NuevoViajePage() {
   })
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = session?.user ?? null
       if (!user) return
       const { data: p } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()
       if (!p?.empresa_id) return
@@ -50,7 +51,7 @@ export default function NuevoViajePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true); setError('')
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
     const { error: err } = await supabase.from('viajes').insert([{
       empresa_id:             empresaId,
       tracto_id:              form.tracto_id || null,

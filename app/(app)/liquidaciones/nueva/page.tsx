@@ -16,7 +16,7 @@ export default function NuevaLiquidacionPage() {
   const s = (k:string,v:any) => setForm(p=>({...p,[k]:v}))
 
   useEffect(() => {
-    supabase.auth.getUser().then(async({data:{user}})=>{
+    supabase.auth.getSession().then(async({data:{session}})=>{ const user = session?.user ?? null
       if(!user) return
       const {data:p} = await supabase.from('usuarios').select('empresa_id').eq('id',user.id).single()
       if(!p?.empresa_id) return

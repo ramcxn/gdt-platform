@@ -22,7 +22,7 @@ export default function NuevaCotizacionPage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
       if (!user) return
       setUserId(user.id)
       const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()

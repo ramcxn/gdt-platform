@@ -8,7 +8,7 @@ const tipoColor: Record<string,string> = { Normal:'green', Retardo:'amber', Falt
 
 export default async function AsistenciaPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
   const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user!.id).single()
   const eid = perfil?.empresa_id
   const hoy = new Date().toISOString().split('T')[0]

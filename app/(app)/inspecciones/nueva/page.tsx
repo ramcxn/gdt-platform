@@ -48,7 +48,8 @@ export default function NuevaInspeccionPage() {
   })
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = session?.user ?? null
       if (!user) return
       const { data: perfil } = await supabase.from('usuarios').select('empresa_id').eq('id', user.id).single()
       if (!perfil?.empresa_id) return
@@ -118,7 +119,7 @@ export default function NuevaInspeccionPage() {
     if (!empresaId) { setError('Sin empresa asignada'); return }
     setSaving(true)
     setError('')
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession(); const user = session?.user ?? null
     const payload = {
       empresa_id: empresaId,
       tipo_movimiento: form.tipo_movimiento,

@@ -61,7 +61,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const user = session?.user ?? null
       if (!user) { router.push('/login'); return }
       const { data: perfil } = await supabase.from('usuarios').select('nombre,empresa_id,rol').eq('id', user.id).single()
       if (perfil) {
