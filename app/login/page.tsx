@@ -68,8 +68,7 @@ export default function LoginPage() {
 
             <button
               type="submit" disabled={loading}
-              className="w-full py-2.5 px-4 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-60 cursor-pointer"
-              className='btn-accent'
+              className="w-full py-2.5 px-4 rounded-lg text-white text-sm font-semibold transition-all disabled:opacity-60 cursor-pointer btn-accent"
             >
               {loading ? 'Verificando...' : 'Entrar al sistema'}
             </button>

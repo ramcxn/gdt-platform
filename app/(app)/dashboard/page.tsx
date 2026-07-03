@@ -41,7 +41,7 @@ async function StatsCards() {
           style={{ borderColor: 'rgba(251,191,36,0.2)' }}>
           <AlertTriangle className="w-8 h-8 text-amber-500 flex-shrink-0" />
           <div>
-            <p className="text-amber-300 font-semibold text-sm">{s.danos} unidad{s.danos > 1 ? 'es' : ''} con daños físicos reportados</p>
+            <p className="text-amber-300 font-semibold text-sm">{s?.danos ?? 0} unidad{(s?.danos ?? 0) > 1 ? 'es' : ''} con daños físicos reportados</p>
             <p className="text-amber-200/70 text-xs mt-0.5">Revisar inspecciones con daños antes de asignar rutas.</p>
           </div>
           <Link href="/inspecciones" className="ml-auto text-xs text-amber-300 font-medium border border-amber-500/30 px-3 py-1.5 rounded-lg hover:bg-amber-500/20 transition-colors">

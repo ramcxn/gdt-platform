@@ -25,8 +25,7 @@ export default async function InspeccionesPage() {
           <p className="text-slate-400 text-sm">{inspecciones?.length ?? 0} registros encontrados</p>
         </div>
         <Link href="/inspecciones/nueva"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm transition-transform hover:scale-105"
-          className='btn-accent'>
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm transition-transform hover:scale-105 btn-accent">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>

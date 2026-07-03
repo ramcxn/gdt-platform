@@ -13,10 +13,10 @@ export default async function InstalacionesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl text-xl flex items-center justify-center" className='btn-accent'>🏗️</div>
+          <div className="w-10 h-10 rounded-xl text-xl flex items-center justify-center btn-accent">🏗️</div>
           <div><h1 className="text-xl font-bold text-white">Mantenimiento Instalaciones</h1><p className="text-slate-400 text-sm">Infraestructura y áreas físicas</p></div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer" className='btn-accent'>
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-semibold cursor-pointer btn-accent">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>Nuevo Trabajo
         </button>
       </div>

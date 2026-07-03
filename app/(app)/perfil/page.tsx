@@ -26,7 +26,7 @@ export default async function PerfilPage() {
           <p className="text-slate-400 text-sm">{user.email}</p>
         </div>
       </div>
-      <PerfilForm perfil={perfil} userEmail={user.email} />
+      <PerfilForm perfil={perfil} userEmail={user.email ?? ''} />
     </div>
   )
 }

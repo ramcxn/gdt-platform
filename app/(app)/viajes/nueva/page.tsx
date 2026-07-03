@@ -210,8 +210,7 @@ export default function NuevoViajePage() {
         <div className="flex justify-between pt-2">
           <Link href="/viajes" className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">← Cancelar</Link>
           <button type="submit" disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50 cursor-pointer shadow transition-transform hover:scale-105"
-            className='btn-accent'>
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50 cursor-pointer shadow transition-transform hover:scale-105 btn-accent">
             {saving ? 'Guardando...' : '🗺️ Registrar Viaje'}
           </button>
         </div>
