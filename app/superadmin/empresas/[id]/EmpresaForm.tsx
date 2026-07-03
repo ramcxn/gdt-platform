@@ -1,11 +1,9 @@
 /* eslint-disable */
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function EmpresaForm({ empresa }: { empresa: any }) {
-  const supabase = createClient()
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
@@ -28,17 +26,23 @@ export default function EmpresaForm({ empresa }: { empresa: any }) {
     e.preventDefault()
     setSaving(true)
     setMsg('')
-    const { error } = await supabase.from('empresas').update({
-      ...form,
-      rfc: form.rfc || null,
-      telefono: form.telefono || null,
-      correo_contacto: form.correo_contacto || null,
-      direccion: form.direccion || null,
-      numero_ctpat: form.numero_ctpat || null,
-      fecha_vigencia_ctpat: form.fecha_vigencia_ctpat || null,
-    }).eq('id', empresa.id)
+    const res = await fetch('/api/superadmin/companies', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: empresa.id,
+        ...form,
+        rfc: form.rfc || null,
+        telefono: form.telefono || null,
+        correo_contacto: form.correo_contacto || null,
+        direccion: form.direccion || null,
+        numero_ctpat: form.numero_ctpat || null,
+        fecha_vigencia_ctpat: form.fecha_vigencia_ctpat || null,
+      }),
+    })
+    const json = await res.json()
     setSaving(false)
-    if (error) setMsg('Error: ' + error.message)
+    if (!res.ok) setMsg('Error: ' + (json.error ?? 'No se pudo guardar'))
     else { setMsg('✓ Guardado correctamente'); router.refresh() }
   }
 

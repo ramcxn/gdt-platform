@@ -31,6 +31,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
       <nav className="border-b border-white/5 px-6 flex gap-1" style={{ background: 'rgba(10,21,38,0.9)' }}>
         {[
           { href: '/superadmin', label: '🏢 Empresas' },
+          { href: '/superadmin/provisionamiento', label: '🧩 Provisionamiento' },
           { href: '/superadmin/planes', label: '📦 Planes' },
           { href: '/superadmin/usuarios', label: '👤 Usuarios' },
           { href: '/superadmin/metricas', label: '📊 Métricas' },

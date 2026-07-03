@@ -1,23 +1,23 @@
 /* eslint-disable */
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function NuevaEmpresaPage() {
-  const supabase = createClient()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [script, setScript] = useState('')
   const [form, setForm] = useState({
     nombre_comercial: '', razon_social: '', rfc: '', telefono: '',
     correo_contacto: '', direccion: '', plan: 'Demo', estado: 'Activo',
     numero_ctpat: '', fecha_vigencia_ctpat: '',
+    seed_defaults: true,
     // Admin inicial
     admin_nombre: '', admin_email: '', admin_password: '',
   })
 
-  const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))
+  const set = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,41 +25,17 @@ export default function NuevaEmpresaPage() {
     setError('')
 
     try {
-      // 1. Crear empresa
-      const { data: emp, error: empErr } = await supabase.from('empresas').insert([{
-        nombre_comercial: form.nombre_comercial,
-        razon_social: form.razon_social || form.nombre_comercial,
-        rfc: form.rfc || null,
-        telefono: form.telefono || null,
-        correo_contacto: form.correo_contacto || null,
-        direccion: form.direccion || null,
-        plan: form.plan,
-        estado: form.estado,
-        numero_ctpat: form.numero_ctpat || null,
-        fecha_vigencia_ctpat: form.fecha_vigencia_ctpat || null,
-      }]).select().single()
-      if (empErr) throw empErr
-
-      // 2. Crear usuario admin si se proveyeron credenciales
-      if (form.admin_email && form.admin_password) {
-        const res = await fetch('/api/superadmin/create-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            empresa_id: emp.id,
-            nombre: form.admin_nombre || 'Administrador',
-            email: form.admin_email,
-            password: form.admin_password,
-            rol: 'Admin_Empresa',
-          })
-        })
-        if (!res.ok) {
-          const { error: apiErr } = await res.json()
-          throw new Error(apiErr ?? 'Error creando usuario admin')
-        }
+      const res = await fetch('/api/superadmin/companies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json.error ?? 'Error creando empresa')
       }
-
-      router.push('/superadmin')
+      setScript(json.sql ?? '')
+      router.push(`/superadmin/empresas/${json.empresa.id}`)
     } catch (e: any) {
       setError(e?.message ?? 'Error desconocido')
     } finally {
@@ -111,6 +87,15 @@ export default function NuevaEmpresaPage() {
           </div>
         </div>
         <Field label="Dirección" k="direccion" placeholder="Calle, Ciudad, Estado, CP" />
+        <label className="flex items-center gap-3 text-sm text-slate-300">
+          <input
+            type="checkbox"
+            checked={form.seed_defaults}
+            onChange={e => set('seed_defaults', e.target.checked)}
+            className="h-4 w-4 rounded border-white/10 bg-[#0f1f35]"
+          />
+          Crear datos base: ubicación de almacén y zonas de rondín
+        </label>
       </div>
 
       {/* Usuario admin inicial */}
@@ -139,6 +124,10 @@ export default function NuevaEmpresaPage() {
           Cancelar
         </button>
       </div>
+      {script && (
+        <textarea readOnly value={script}
+          className="w-full h-72 p-4 bg-[#07111f] border border-white/10 rounded-xl text-slate-200 text-xs font-mono outline-none resize-none" />
+      )}
     </form>
   )
 }

@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 
 function Badge({ text, color }: { text: string; color: string }) {
@@ -18,7 +19,8 @@ const estadoColor: Record<string,string> = { Activo:'green', Suspendido:'red', D
 const planColor: Record<string,string> = { Enterprise:'purple', Premium:'blue', Básico:'green', Demo:'amber' }
 
 export default async function SuperAdminEmpresasPage() {
-  const supabase = await createClient()
+  await createClient()
+  const supabase = createAdminClient()
 
   // Stats globales
   const [
