@@ -1,7 +1,7 @@
 /* eslint-disable */
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { buildCompanyProvisionSql } from '@/lib/company-provisioning'
 
 async function requireSuperAdmin() {
@@ -32,11 +32,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Nombre comercial requerido' }, { status: 400 })
     }
 
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
+    const adminSupabase = createAdminClient()
 
     const { data: empresa, error: empresaErr } = await adminSupabase
       .from('empresas')
@@ -113,11 +109,7 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     if (!body.id) return NextResponse.json({ error: 'ID de empresa requerido' }, { status: 400 })
 
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
+    const adminSupabase = createAdminClient()
 
     const { data, error } = await adminSupabase
       .from('empresas')

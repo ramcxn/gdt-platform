@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import EmpresaForm from './EmpresaForm'
@@ -12,8 +11,7 @@ function Badge({ text, color }: { text: string; color: string }) {
 const rolColor: Record<string,string> = { SuperAdmin:'red', Admin_Empresa:'purple', Supervisor:'blue', Operador:'green', Guardia:'amber', Chofer:'slate' }
 
 export default async function EmpresaDetailPage({ params }: { params: { id: string } }) {
-  await createClient()
-  const supabase = createAdminClient()
+  const supabase = await createClient()
   const { data: empresa } = await supabase.from('empresas').select('*').eq('id', params.id).single()
   if (!empresa) notFound()
 
