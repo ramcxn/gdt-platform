@@ -3,18 +3,18 @@ import Link from 'next/link'
 import type { InspeccionCTpat } from '@/lib/types'
 import {
   ClipboardList,
-  Clock,
-  ArrowRightCircle,
-  ArrowLeftCircle,
   AlertTriangle,
   Truck,
   UserCheck,
   ShieldCheck,
   Activity,
   TrendingUp,
+  Wrench,
+  CalendarClock,
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { MovimientosDoughnut, InspeccionesMensualBar } from '@/components/dashboard-charts'
 
 // ─── Streamed: Greeting + Welcome Banner ──────────────────────────
 
@@ -50,46 +50,199 @@ async function WelcomeBanner() {
   )
 }
 
-// ─── Streamed: Stats Cards ────────────────────────────────────────
+// ─── Ring meter (medidor circular, sin JS) ─────────────────────────
+
+function RingMeter({ label, pct, color }: { label: string; pct: number; color: string }) {
+  const safePct = Number.isFinite(pct) ? Math.max(0, Math.min(100, Math.round(pct))) : 0
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: `conic-gradient(${color} 0 ${safePct}%, var(--ring-track) 0 100%)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto',
+        }}
+      >
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            background: 'var(--bg-card-solid)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+          }}
+        >
+          {safePct}%
+        </div>
+      </div>
+      <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
+        {label}
+      </p>
+    </div>
+  )
+}
+
+// ─── Streamed: Overview + Dona + Medidores + Barras + Próximos mantenimientos ──
 
 async function StatsCardsGrid() {
   const { empresaId } = await getSessionContext()
   const supabase = await createClient()
 
-  const { data: stats } = await supabase.rpc('get_dashboard_stats', { p_empresa_id: empresaId })
-  const s = stats as { total: number; hoy: number; entradas: number; salidas: number; danos: number } | null
+  const [{ data: stats }, { data: proximos }] = await Promise.all([
+    supabase.rpc('get_dashboard_stats_v2', { p_empresa_id: empresaId }),
+    supabase
+      .from('mantenimiento')
+      .select('tracto_numero, tipo, estado, fecha_programada')
+      .eq('empresa_id', empresaId)
+      .eq('estado', 'Pendiente')
+      .order('fecha_programada', { ascending: true })
+      .limit(5),
+  ])
+
+  const s = stats as {
+    total: number
+    hoy: number
+    entradas: number
+    salidas: number
+    danos: number
+    flota_total: number
+    flota_activa: number
+    mant_total: number
+    mant_completado: number
+    mensual: { mes: string; total: number }[]
+  } | null
+
+  const flotaPct = s?.flota_total ? (s.flota_activa / s.flota_total) * 100 : 0
+  const mantPct = s?.mant_total ? (s.mant_completado / s.mant_total) * 100 : 100
+  const checklistPct = s?.total ? 100 - (s.danos / s.total) * 100 : 100
 
   return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard
-          label="Total inspecciones"
-          value={s?.total ?? 0}
-          icon={<ClipboardList className="w-5 h-5" />}
-          kpiClass="kpi-blue"
-          trend="+ históricas"
-        />
-        <KpiCard
-          label="Inspecciones hoy"
-          value={s?.hoy ?? 0}
-          icon={<Clock className="w-5 h-5" />}
-          kpiClass="kpi-green"
-          trend="en el día"
-        />
-        <KpiCard
-          label="Entradas"
-          value={s?.entradas ?? 0}
-          icon={<ArrowRightCircle className="w-5 h-5" />}
-          kpiClass="kpi-indigo"
-          trend="unidades ingresadas"
-        />
-        <KpiCard
-          label="Salidas"
-          value={s?.salidas ?? 0}
-          icon={<ArrowLeftCircle className="w-5 h-5" />}
-          kpiClass="kpi-teal"
-          trend="unidades despachadas"
-        />
+    <div className="space-y-5">
+      {/* Fila 1: overview + dona + medidores */}
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_1fr] gap-4 items-stretch">
+        <div
+          className="rounded-xl p-4 text-white flex flex-col gap-2"
+          style={{ background: 'var(--brand-gradient)' }}
+        >
+          <p className="text-sm font-medium opacity-90">Resumen de flota</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold">{s?.flota_activa ?? 0}</span>
+            <span className="text-xs opacity-80">unidades activas</span>
+          </div>
+          <div className="flex gap-2 opacity-90">
+            <Truck className="w-4 h-4" />
+          </div>
+          <p className="text-[11px] opacity-80 mt-1">
+            {s?.entradas ?? 0} entradas · {s?.salidas ?? 0} salidas · {s?.danos ?? 0} con daños
+          </p>
+        </div>
+
+        <div className="rounded-xl p-4 card-app">
+          <p className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            Movimientos CTPAT
+          </p>
+          <div className="flex items-center gap-3">
+            <div style={{ position: 'relative', width: 88, height: 88, flexShrink: 0 }}>
+              <MovimientosDoughnut
+                entradas={s?.entradas ?? 0}
+                salidas={s?.salidas ?? 0}
+                danos={s?.danos ?? 0}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#3B82F6' }} />
+                Entradas · {s?.entradas ?? 0}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#8B5CF6' }} />
+                Salidas · {s?.salidas ?? 0}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#FB7185' }} />
+                Con daños · {s?.danos ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl p-4 card-app">
+          <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+            Indicadores de operación
+          </p>
+          <div className="flex justify-around">
+            <RingMeter label="Flota activa" pct={flotaPct} color="#3B82F6" />
+            <RingMeter label="Mant. al día" pct={mantPct} color="#8B5CF6" />
+            <RingMeter label="Sin daños" pct={checklistPct} color="#FB7185" />
+          </div>
+        </div>
+      </div>
+
+      {/* Fila 2: barras mensuales + próximos mantenimientos */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-stretch">
+        <div className="rounded-xl p-4 card-app">
+          <p className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            Inspecciones por mes
+          </p>
+          <div style={{ position: 'relative', width: '100%', height: 220 }}>
+            <InspeccionesMensualBar data={s?.mensual ?? []} />
+          </div>
+        </div>
+
+        <div className="rounded-xl overflow-hidden card-app">
+          <div
+            className="px-4 py-3 border-b flex items-center gap-2"
+            style={{ borderColor: 'var(--border-subtle)' }}
+          >
+            <Wrench className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Próximos mantenimientos
+            </p>
+          </div>
+          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+            {proximos && proximos.length > 0 ? (
+              proximos.map((m, i) => (
+                <div key={i} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                      {m.tracto_numero} · {m.tipo}
+                    </p>
+                    <p className="text-[11px] flex items-center gap-1 mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <CalendarClock className="w-3 h-3" />
+                      {m.fecha_programada
+                        ? new Date(m.fecha_programada).toLocaleDateString('es-MX', {
+                            day: 'numeric',
+                            month: 'short',
+                          })
+                        : 'Sin fecha'}
+                    </p>
+                  </div>
+                  <span
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: 'rgba(139,92,246,0.15)', color: '#8B5CF6' }}
+                  >
+                    Pendiente
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-8 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                <Wrench className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                Sin mantenimientos pendientes.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Alerta de daños */}
@@ -109,15 +262,12 @@ async function StatsCardsGrid() {
               Revisar inspecciones con daños antes de asignar rutas.
             </p>
           </div>
-          <Link
-            href="/inspecciones"
-            className="btn-accent text-xs whitespace-nowrap"
-          >
+          <Link href="/inspecciones" className="btn-accent text-xs whitespace-nowrap">
             Ver inspecciones
           </Link>
         </div>
       )}
-    </>
+    </div>
   )
 }
 
@@ -223,10 +373,16 @@ async function RecentInspections() {
 
 function StatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-24 rounded-xl skeleton" />
-      ))}
+    <div className="space-y-5 animate-pulse">
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_1fr] gap-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-40 rounded-xl skeleton" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+        <div className="h-56 rounded-xl skeleton" />
+        <div className="h-56 rounded-xl skeleton" />
+      </div>
     </div>
   )
 }
@@ -276,14 +432,14 @@ export default async function DashboardPage() {
             icon={<UserCheck className="w-5 h-5" />}
             title="Control de acceso"
             desc="Registrar empleado o proveedor"
-            colorClass="action-teal"
+            colorClass="action-purple"
           />
           <QuickActionCard
             href="/rondines"
             icon={<ShieldCheck className="w-5 h-5" />}
             title="Iniciar rondín"
             desc="Recorrido de seguridad por zonas"
-            colorClass="action-purple"
+            colorClass="action-rose"
           />
         </div>
 
@@ -296,36 +452,6 @@ export default async function DashboardPage() {
           <RecentInspections />
         </Suspense>
       </div>
-    </div>
-  )
-}
-
-// ─── KPI Card ─────────────────────────────────────────────────────
-
-function KpiCard({
-  label,
-  value,
-  icon,
-  kpiClass,
-  trend,
-}: {
-  label: string
-  value: number
-  icon: React.ReactNode
-  kpiClass: string
-  trend?: string
-}) {
-  return (
-    <div className={`${kpiClass} rounded-xl p-4 text-white shadow-sm transition-all hover:scale-[1.02] hover:shadow-md`}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-white/80">{icon}</span>
-        <span className="inline-flex items-center gap-1 text-[10px] text-white/60 bg-white/10 rounded-full px-2 py-0.5">
-          <span className="w-1 h-1 rounded-full bg-white/60" />
-          {trend ?? ''}
-        </span>
-      </div>
-      <p className="text-2xl md:text-3xl font-bold tracking-tight">{value.toLocaleString()}</p>
-      <p className="text-xs text-white/70 mt-1 font-medium">{label}</p>
     </div>
   )
 }

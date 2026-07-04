@@ -45,6 +45,10 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
 
   --welcome-gradient: linear-gradient(135deg, #1a365d 0%, #1E3A5F 50%, #2563eb 100%);
+
+  --brand-gradient: linear-gradient(135deg, #4338ca, #7c3aed);
+  --brand-primary: #7c3aed;
+  --ring-track: rgba(255, 255, 255, 0.08);
 }
 
 /* ===================== LIGHT MODE ===================== */
@@ -89,6 +93,10 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   --welcome-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+
+  --brand-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
+  --brand-primary: #7c3aed;
+  --ring-track: rgba(0, 0, 0, 0.08);
 }
 
 /* ---- Base ---- */
@@ -203,6 +211,7 @@ body {
 [data-theme="dark"] .kpi-orange { background: linear-gradient(135deg, #9a3412, #f97316); }
 [data-theme="dark"] .kpi-teal   { background: linear-gradient(135deg, #0f766e, #14b8a6); }
 [data-theme="dark"] .kpi-rose   { background: linear-gradient(135deg, #9f1239, #e11d48); }
+[data-theme="dark"] .kpi-violet { background: linear-gradient(135deg, #4338ca, #7c3aed); }
 
 [data-theme="light"] .kpi-blue   { background: linear-gradient(135deg, #2563eb, #3b82f6); }
 [data-theme="light"] .kpi-green  { background: linear-gradient(135deg, #16a34a, #22c55e); }
@@ -210,6 +219,7 @@ body {
 [data-theme="light"] .kpi-orange { background: linear-gradient(135deg, #ea580c, #fb923c); }
 [data-theme="light"] .kpi-teal   { background: linear-gradient(135deg, #0d9488, #2dd4bf); }
 [data-theme="light"] .kpi-rose   { background: linear-gradient(135deg, #e11d48, #fb7185); }
+[data-theme="light"] .kpi-violet { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
 
 /* ---- Light mode text, bg, border overrides ---- */
 
@@ -311,7 +321,7 @@ input:focus, textarea:focus, select:focus {
   width: 3px;
   height: 60%;
   border-radius: 0 3px 3px 0;
-  background: var(--sidebar-active-border);
+  background: var(--brand-primary);
 }
 
 /* ---- Badge counter ---- */
