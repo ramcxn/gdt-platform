@@ -72,6 +72,7 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   className="sidebar-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all"
                   style={{
                     background: active ? 'var(--sidebar-active-bg)' : 'transparent',
@@ -115,6 +116,7 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
         <div className="px-3 pb-2">
           <Link
             href="/superadmin"
+            prefetch={false}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
             style={{
               color: '#a78bfa',
@@ -131,6 +133,7 @@ function SidebarContent({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean;
       <div className="px-3 py-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
         <Link
           href="/perfil"
+          prefetch={false}
           onClick={() => setSidebarOpen(false)}
           className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all"
           style={{ background: 'var(--sidebar-hover)' }}
