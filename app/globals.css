@@ -329,6 +329,12 @@ input:focus, textarea:focus, select:focus {
   line-height: 1;
 }
 
+/* ---- Hoverable list row (server-renderable, no JS handlers) ---- */
+
+.row-hover:hover {
+  background: var(--bg-hover);
+}
+
 /* ---- Skeleton loading ---- */
 
 .skeleton {

@@ -163,14 +163,7 @@ async function RecentInspections() {
             <Link
               key={insp.id}
               href={`/inspecciones/${insp.id}`}
-              className="flex items-center gap-3 px-5 py-3.5 transition-all"
-              style={{ background: 'transparent' }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent'
-              }}
+              className="row-hover flex items-center gap-3 px-5 py-3.5 transition-all"
             >
               {/* Status dot */}
               <span
