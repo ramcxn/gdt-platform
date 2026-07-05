@@ -11,12 +11,13 @@ import {
   TrendingUp,
   Wrench,
   CalendarClock,
+  ArrowRight,
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { MovimientosDoughnut, InspeccionesMensualBar } from '@/components/dashboard-charts'
 
-// ─── Streamed: Greeting + Welcome Banner ──────────────────────────
+// ─── Welcome Banner ───────────────────────────────────────
 
 async function WelcomeBanner() {
   const { perfil } = await getSessionContext()
@@ -50,7 +51,7 @@ async function WelcomeBanner() {
   )
 }
 
-// ─── Ring meter (medidor circular, sin JS) ─────────────────────────
+// ─── Ring meter ───────────────────────────────────────────
 
 function RingMeter({ label, pct, color }: { label: string; pct: number; color: string }) {
   const safePct = Number.isFinite(pct) ? Math.max(0, Math.min(100, Math.round(pct))) : 0
@@ -73,26 +74,59 @@ function RingMeter({ label, pct, color }: { label: string; pct: number; color: s
             width: 40,
             height: 40,
             borderRadius: '50%',
-            background: 'var(--bg-card-solid)',
+            background: 'var(--bg-surface)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 12,
             fontWeight: 600,
-            color: 'var(--text-primary)',
+            color: 'var(--text-heading)',
           }}
         >
           {safePct}%
         </div>
       </div>
-      <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-tertiary)' }}>
+      <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
         {label}
       </p>
     </div>
   )
 }
 
-// ─── Streamed: Overview + Dona + Medidores + Barras + Próximos mantenimientos ──
+// ─── Quick Action ─────────────────────────────────────────
+
+function QuickActionCard({
+  href,
+  icon,
+  title,
+  desc,
+  gradient,
+}: {
+  href: string
+  icon: React.ReactNode
+  title: string
+  desc: string
+  gradient: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-white transition-all hover:scale-[1.01]"
+      style={{ background: gradient }}
+    >
+      <div className="w-9 h-9 rounded-md bg-white/15 flex items-center justify-center flex-shrink-0">
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs text-white/60 mt-0.5">{desc}</p>
+      </div>
+      <ArrowRight className="w-4 h-4 text-white/40 flex-shrink-0" />
+    </Link>
+  )
+}
+
+// ─── Stats + Charts ───────────────────────────────────────
 
 async function StatsCardsGrid() {
   const { empresaId } = await getSessionContext()
@@ -128,30 +162,52 @@ async function StatsCardsGrid() {
 
   return (
     <div className="space-y-5">
-      {/* Fila 1: overview + dona + medidores */}
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_1fr] gap-4 items-stretch">
+      {/* Row 1: KPI Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { value: s?.total ?? 0, label: 'Inspecciones totales', change: `+${s?.hoy ?? 0} hoy`, up: true },
+          { value: s?.entradas ?? 0, label: 'Entradas registradas', change: `${((s?.entradas ?? 0) / (s?.total ?? 1) * 100).toFixed(0)}% del total`, up: true },
+          { value: s?.flota_activa ?? 0, label: 'Unidades activas', change: s?.flota_total ? `${Math.round(flotaPct)}% de la flota` : '—', up: flotaPct >= 50 },
+          { value: s?.mant_total ?? 0, label: 'Servicios de mantenimiento', change: `${s?.mant_completado ?? 0} completados`, up: mantPct >= 50 },
+        ].map((kpi, i) => (
+          <div key={i} className="kpi-card">
+            <div className="flex items-center justify-between mb-1">
+              <span className="kpi-value">{kpi.value}</span>
+            </div>
+            <p className="kpi-label">{kpi.label}</p>
+            <p className={`kpi-change ${kpi.up ? 'up' : 'down'}`}>
+              {kpi.up ? '↑' : '↓'} {kpi.change}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Row 2: Doughnut + Ring meters + Chart + Maintenance */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {/* Fleet summary */}
         <div
-          className="rounded-xl p-4 text-white flex flex-col gap-2"
-          style={{ background: 'var(--brand-gradient)' }}
+          className="rounded-xl p-5 text-white flex flex-col gap-2"
+          style={{ background: 'linear-gradient(135deg, #1a2d4a, #2563eb)' }}
         >
-          <p className="text-sm font-medium opacity-90">Resumen de flota</p>
-          <div className="flex items-baseline gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide opacity-80">Resumen de flota</p>
+          <div className="flex items-baseline gap-2 mt-1">
             <span className="text-3xl font-bold">{s?.flota_activa ?? 0}</span>
-            <span className="text-xs opacity-80">unidades activas</span>
+            <span className="text-sm opacity-80">/ {s?.flota_total ?? 0} unidades</span>
           </div>
-          <div className="flex gap-2 opacity-90">
-            <Truck className="w-4 h-4" />
+          <div className="flex gap-1 mt-1">
+            <Truck className="w-4 h-4 opacity-80" />
           </div>
-          <p className="text-[11px] opacity-80 mt-1">
+          <p className="text-xs opacity-70 mt-auto">
             {s?.entradas ?? 0} entradas · {s?.salidas ?? 0} salidas · {s?.danos ?? 0} con daños
           </p>
         </div>
 
-        <div className="rounded-xl p-4 card-app">
-          <p className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+        {/* Movimientos doughnut */}
+        <div className="card-app p-4">
+          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--text-heading)' }}>
             Movimientos CTPAT
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div style={{ position: 'relative', width: 88, height: 88, flexShrink: 0 }}>
               <MovimientosDoughnut
                 entradas={s?.entradas ?? 0}
@@ -159,62 +215,58 @@ async function StatsCardsGrid() {
                 danos={s?.danos ?? 0}
               />
             </div>
-            <div className="flex flex-col gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#3B82F6' }} />
-                Entradas · {s?.entradas ?? 0}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#8B5CF6' }} />
-                Salidas · {s?.salidas ?? 0}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#FB7185' }} />
-                Con daños · {s?.danos ?? 0}
-              </span>
+            <div className="flex flex-col gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+              {[
+                { color: '#3B82F6', label: 'Entradas', value: s?.entradas ?? 0 },
+                { color: '#6366F1', label: 'Salidas', value: s?.salidas ?? 0 },
+                { color: '#FB7185', label: 'Con daños', value: s?.danos ?? 0 },
+              ].map((item, i) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
+                  {item.label} · {item.value}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl p-4 card-app">
-          <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+        {/* Ring meters */}
+        <div className="card-app p-4">
+          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--text-heading)' }}>
             Indicadores de operación
           </p>
           <div className="flex justify-around">
             <RingMeter label="Flota activa" pct={flotaPct} color="#3B82F6" />
-            <RingMeter label="Mant. al día" pct={mantPct} color="#8B5CF6" />
+            <RingMeter label="Mantenimiento" pct={mantPct} color="#6366F1" />
             <RingMeter label="Sin daños" pct={checklistPct} color="#FB7185" />
           </div>
         </div>
       </div>
 
-      {/* Fila 2: barras mensuales + próximos mantenimientos */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 items-stretch">
-        <div className="rounded-xl p-4 card-app">
-          <p className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Inspecciones por mes
+      {/* Row 3: Bar chart + Maintenance table */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-3">
+        <div className="card-app p-4">
+          <p className="text-xs font-semibold mb-3" style={{ color: 'var(--text-heading)' }}>
+            Inspecciones mensuales
           </p>
           <div style={{ position: 'relative', width: '100%', height: 220 }}>
             <InspeccionesMensualBar data={s?.mensual ?? []} />
           </div>
         </div>
 
-        <div className="rounded-xl overflow-hidden card-app">
-          <div
-            className="px-4 py-3 border-b flex items-center gap-2"
-            style={{ borderColor: 'var(--border-subtle)' }}
-          >
-            <Wrench className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Próximos mantenimientos
-            </p>
+        <div className="card-app overflow-hidden">
+          <div className="card-app-header">
+            <div className="flex items-center gap-2">
+              <Wrench className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+              <h3>Mantenimientos programados</h3>
+            </div>
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
             {proximos && proximos.length > 0 ? (
               proximos.map((m, i) => (
-                <div key={i} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                <div key={i} className="px-4 py-3 flex items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-heading)' }}>
                       {m.tracto_numero} · {m.tipo}
                     </p>
                     <p className="text-[11px] flex items-center gap-1 mt-0.5" style={{ color: 'var(--text-muted)' }}>
@@ -227,43 +279,34 @@ async function StatsCardsGrid() {
                         : 'Sin fecha'}
                     </p>
                   </div>
-                  <span
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: 'rgba(139,92,246,0.15)', color: '#8B5CF6' }}
-                  >
+                  <span className="status-badge status-badge-amber">
+                    <span className="dot" />
                     Pendiente
                   </span>
                 </div>
               ))
             ) : (
-              <div className="px-4 py-8 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                <Wrench className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                Sin mantenimientos pendientes.
+              <div className="px-4 py-8 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
+                <Wrench className="w-6 h-6 mx-auto mb-2 opacity-30" />
+                Sin mantenimientos pendientes
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Alerta de daños */}
+      {/* Damage alert */}
       {(s?.danos ?? 0) > 0 && (
-        <div
-          className="rounded-xl p-4 flex items-center gap-3 card-app"
-          style={{ borderLeft: '4px solid #f59e0b' }}
-        >
-          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-5 h-5 text-amber-400" />
+        <div className="alert-card">
+          <div className="icon-box" style={{ background: 'var(--amber-bg)' }}>
+            <AlertTriangle className="w-4 h-4" style={{ color: 'var(--amber)' }} />
           </div>
-          <div className="flex-1">
-            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-              {s?.danos ?? 0} unidad{(s?.danos ?? 0) > 1 ? 'es' : ''} con daños físicos reportados
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-              Revisar inspecciones con daños antes de asignar rutas.
-            </p>
+          <div className="alert-card-text flex-1">
+            <h4>{s?.danos ?? 0} unidad{(s?.danos ?? 0) > 1 ? 'es' : ''} con daños físicos reportados</h4>
+            <p>Revisar inspecciones con daños antes de asignar nuevas rutas</p>
           </div>
-          <Link href="/inspecciones" className="btn-accent text-xs whitespace-nowrap">
-            Ver inspecciones
+          <Link href="/inspecciones" className="btn-accent btn-accent-sm whitespace-nowrap">
+            Revisar inspecciones
           </Link>
         </div>
       )}
@@ -271,7 +314,7 @@ async function StatsCardsGrid() {
   )
 }
 
-// ─── Streamed: Recent Inspections ─────────────────────────────────
+// ─── Recent Inspections ────────────────────────────────────
 
 async function RecentInspections() {
   const { empresaId } = await getSessionContext()
@@ -285,26 +328,19 @@ async function RecentInspections() {
     .limit(5)
 
   return (
-    <div className="md:col-span-2 rounded-xl overflow-hidden card-app">
-      <div
-        className="px-5 py-3.5 border-b flex items-center justify-between"
-        style={{ borderColor: 'var(--border-subtle)' }}
-      >
+    <div className="md:col-span-2 card-app overflow-hidden">
+      <div className="card-app-header">
         <div className="flex items-center gap-2">
-          <ClipboardList className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Últimas inspecciones
-          </h2>
+          <ClipboardList className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+          <h3>Últimas inspecciones</h3>
         </div>
         <Link
           href="/inspecciones"
           className="text-xs font-medium flex items-center gap-1"
-          style={{ color: 'var(--accent-primary)' }}
+          style={{ color: 'var(--accent)' }}
         >
           Ver todas
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
       <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
@@ -315,25 +351,22 @@ async function RecentInspections() {
               href={`/inspecciones/${insp.id}`}
               className="row-hover flex items-center gap-3 px-5 py-3.5 transition-all"
             >
-              {/* Status dot */}
               <span
                 className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
                   insp.tipo_movimiento === 'Entrada' ? 'bg-green-400' : 'bg-red-400'
                 }`}
               />
-              {/* Content */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-heading)' }}>
                   {insp.tracto_numero}
                   {insp.operador_nombre
                     ? ` — ${insp.operador_nombre.split(' ').slice(0, 2).join(' ')}`
                     : ''}
                 </p>
-                <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
                   {insp.cliente || 'Sin cliente'} · {insp.origen} → {insp.destino}
                 </p>
               </div>
-              {/* Badge + time */}
               <div className="text-right flex-shrink-0">
                 <span
                   className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full ${
@@ -359,9 +392,9 @@ async function RecentInspections() {
             </Link>
           ))
         ) : (
-          <div className="px-5 py-10 text-center text-sm" style={{ color: 'var(--text-tertiary)' }}>
-            <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-40" />
-            No hay inspecciones registradas aún.
+          <div className="px-5 py-10 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+            <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-30" />
+            No hay inspecciones registradas aún
           </div>
         )}
       </div>
@@ -369,123 +402,85 @@ async function RecentInspections() {
   )
 }
 
-// ─── Skeleton loaders ─────────────────────────────────────────────
+// ─── Skeletons ─────────────────────────────────────────────
 
 function StatsSkeleton() {
   return (
     <div className="space-y-5 animate-pulse">
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_1fr] gap-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-40 rounded-xl skeleton" />
-        ))}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl skeleton" />)}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        <div className="h-56 rounded-xl skeleton" />
-        <div className="h-56 rounded-xl skeleton" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-40 rounded-xl skeleton" />)}
       </div>
     </div>
   )
 }
 
-// ─── Main page ────────────────────────────────────────────────────
+// ─── Main page ─────────────────────────────────────────────
 
 export default async function DashboardPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Page header */}
+      <div>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-heading)' }}>
+          Dashboard
+        </h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+          Resumen operativo del sistema CTPAT
+        </p>
+      </div>
+
       {/* Welcome Banner */}
-      <Suspense
-        fallback={
-          <div className="h-28 rounded-xl skeleton animate-pulse" />
-        }
-      >
+      <Suspense fallback={<div className="h-28 rounded-xl skeleton animate-pulse" />}>
         <WelcomeBanner />
       </Suspense>
 
-      {/* Stats Cards */}
+      {/* Stats + Charts */}
       <Suspense fallback={<StatsSkeleton />}>
         <StatsCardsGrid />
       </Suspense>
 
-      {/* Bottom section: Quick Actions + Recent */}
-      <div className="grid md:grid-cols-3 gap-5">
-        {/* Quick Actions — colorful cards */}
-        <div className="rounded-xl p-5 space-y-3 card-app">
+      {/* Bottom: Quick Actions + Recent Inspections */}
+      <div className="grid md:grid-cols-3 gap-3">
+        {/* Quick Actions */}
+        <div className="card-app p-4 space-y-2.5">
           <div className="flex items-center gap-2 mb-1">
-            <Activity className="w-4 h-4" style={{ color: 'var(--text-tertiary)' }} />
-            <h2
-              className="text-sm font-semibold uppercase tracking-wide"
-              style={{ color: 'var(--text-tertiary)' }}
-            >
+            <Activity className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+            <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               Acciones rápidas
-            </h2>
+            </h3>
           </div>
 
           <QuickActionCard
             href="/inspecciones/nueva"
-            icon={<Truck className="w-5 h-5" />}
-            title="Nueva inspección CTPAT"
+            icon={<Truck className="w-4 h-4" />}
+            title="Nueva inspección"
             desc="Registrar entrada o salida de unidad"
-            colorClass="action-blue"
+            gradient="linear-gradient(135deg, #2563eb, #3b82f6)"
           />
           <QuickActionCard
             href="/acceso"
-            icon={<UserCheck className="w-5 h-5" />}
+            icon={<UserCheck className="w-4 h-4" />}
             title="Control de acceso"
             desc="Registrar empleado o proveedor"
-            colorClass="action-purple"
+            gradient="linear-gradient(135deg, #4f46e5, #6366f1)"
           />
           <QuickActionCard
             href="/rondines"
-            icon={<ShieldCheck className="w-5 h-5" />}
+            icon={<ShieldCheck className="w-4 h-4" />}
             title="Iniciar rondín"
             desc="Recorrido de seguridad por zonas"
-            colorClass="action-rose"
+            gradient="linear-gradient(135deg, #0891b2, #06b6d4)"
           />
         </div>
 
         {/* Recent Inspections */}
-        <Suspense
-          fallback={
-            <div className="md:col-span-2 h-64 rounded-xl skeleton animate-pulse" />
-          }
-        >
+        <Suspense fallback={<div className="md:col-span-2 h-64 rounded-xl skeleton animate-pulse" />}>
           <RecentInspections />
         </Suspense>
       </div>
     </div>
-  )
-}
-
-// ─── Quick Action Card ────────────────────────────────────────────
-
-function QuickActionCard({
-  href,
-  icon,
-  title,
-  desc,
-  colorClass,
-}: {
-  href: string
-  icon: React.ReactNode
-  title: string
-  desc: string
-  colorClass: string
-}) {
-  return (
-    <Link
-      href={href}
-      className={`${colorClass} flex items-center gap-4 p-4 rounded-xl text-white transition-all hover:scale-[1.02] hover:shadow-md`}
-    >
-      <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="text-xs text-white/70 mt-0.5">{desc}</p>
-      </div>
-      <svg className="w-4 h-4 text-white/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
-    </Link>
   )
 }

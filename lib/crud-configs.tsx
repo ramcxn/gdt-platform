@@ -6,7 +6,7 @@ const estadoServicio = { Pendiente: 'amber', En_Proceso: 'blue', Completado: 'gr
 const abiertoCerrado = { Abierta: 'amber', En_Proceso: 'blue', Cerrada: 'green' }
 
 export const sellosConfig: CrudConfig = {
-  table: 'sellos_seguridad', icon: '🔒', title: 'Sellos de Seguridad', subtitle: 'Control y trazabilidad de sellos CTPAT', addLabel: 'Registrar sello',
+  table: 'sellos_seguridad', icon: 'SL', title: 'Sellos de Seguridad', subtitle: 'Control y trazabilidad de sellos CTPAT', addLabel: 'Registrar sello',
   fields: [
     { key: 'numero', label: 'Número', required: true, table: true },
     { key: 'tipo', label: 'Tipo', type: 'select', options: ['Botella', 'Cable', 'Plástico', 'Metálico'], table: true },
@@ -17,15 +17,15 @@ export const sellosConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🔒', label: 'Total sellos', sub: 'Inventario', count: r => r.length },
-    { icon: '✅', label: 'Disponibles', sub: 'En stock', count: r => r.filter(x => x.estado === 'Disponible').length },
-    { icon: '🚛', label: 'En uso', sub: 'Asignados', count: r => r.filter(x => x.estado === 'En_Uso').length },
-    { icon: '⚠️', label: 'Rotos/Extraviados', sub: 'Baja', count: r => r.filter(x => x.estado === 'Roto' || x.estado === 'Extraviado').length },
+    { icon: 'SL', label: 'Total sellos', sub: 'Inventario', count: r => r.length },
+    { icon: 'OK', label: 'Disponibles', sub: 'En stock', count: r => r.filter(x => x.estado === 'Disponible').length },
+    { icon: 'TR', label: 'En uso', sub: 'Asignados', count: r => r.filter(x => x.estado === 'En_Uso').length },
+    { icon: 'AR', label: 'Rotos/Extraviados', sub: 'Baja', count: r => r.filter(x => x.estado === 'Roto' || x.estado === 'Extraviado').length },
   ],
 }
 
 export const visitasConfig: CrudConfig = {
-  table: 'visitas_proveedores', icon: '🪪', title: 'Visitas y Proveedores', subtitle: 'Registro de entradas y salidas', addLabel: 'Registrar visita',
+  table: 'visitas_proveedores', icon: 'VS', title: 'Visitas y Proveedores', subtitle: 'Registro de entradas y salidas', addLabel: 'Registrar visita',
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'tipo', label: 'Tipo', type: 'select', required: true, options: ['Visita', 'Proveedor', 'Contratista', 'Transportista'], table: true, badge: { Visita: 'blue', Proveedor: 'indigo', Contratista: 'amber', Transportista: 'purple' } },
@@ -38,15 +38,15 @@ export const visitasConfig: CrudConfig = {
     { key: 'salida', label: 'Salida', type: 'datetime' },
   ],
   kpis: [
-    { icon: '🪪', label: 'Registros', count: r => r.length },
-    { icon: '🏢', label: 'Dentro ahora', sub: 'Sin salida', count: r => r.filter(x => x.entrada && !x.salida).length },
-    { icon: '📅', label: 'Hoy', count: r => r.filter(x => x.entrada && new Date(x.entrada).toDateString() === new Date().toDateString()).length },
-    { icon: '📦', label: 'Proveedores', count: r => r.filter(x => x.tipo === 'Proveedor').length },
+    { icon: 'VS', label: 'Registros', count: r => r.length },
+    { icon: 'CO', label: 'Dentro ahora', sub: 'Sin salida', count: r => r.filter(x => x.entrada && !x.salida).length },
+    { icon: 'DT', label: 'Hoy', count: r => r.filter(x => x.entrada && new Date(x.entrada).toDateString() === new Date().toDateString()).length },
+    { icon: 'IE', label: 'Proveedores', count: r => r.filter(x => x.tipo === 'Proveedor').length },
   ],
 }
 
 export const vacacionesConfig: CrudConfig = {
-  table: 'vacaciones', icon: '🏖️', title: 'Vacaciones', subtitle: 'Solicitudes y control de días', addLabel: 'Nueva solicitud',
+  table: 'vacaciones', icon: 'VC', title: 'Vacaciones', subtitle: 'Solicitudes y control de días', addLabel: 'Nueva solicitud',
   fields: [
     { key: 'nombre_empleado', label: 'Empleado', required: true, table: true },
     { key: 'fecha_inicio', label: 'Inicio', type: 'date', required: true, table: true },
@@ -56,15 +56,15 @@ export const vacacionesConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '📋', label: 'Solicitudes', count: r => r.length },
-    { icon: '⏳', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
-    { icon: '✅', label: 'Aprobadas', count: r => r.filter(x => x.estado === 'Aprobada').length },
-    { icon: '🏖️', label: 'Días totales', count: r => r.reduce((a, x) => a + (x.dias ?? 0), 0) },
+    { icon: 'FM', label: 'Solicitudes', count: r => r.length },
+    { icon: 'PD', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
+    { icon: 'OK', label: 'Aprobadas', count: r => r.filter(x => x.estado === 'Aprobada').length },
+    { icon: 'VC', label: 'Días totales', count: r => r.reduce((a, x) => a + (x.dias ?? 0), 0) },
   ],
 }
 
 export const antidopingConfig: CrudConfig = {
-  table: 'antidoping', icon: '🧪', title: 'Antidoping', subtitle: 'Pruebas de detección de sustancias', addLabel: 'Registrar prueba',
+  table: 'antidoping', icon: 'AN', title: 'Antidoping', subtitle: 'Pruebas de detección de sustancias', addLabel: 'Registrar prueba',
   fields: [
     { key: 'nombre_empleado', label: 'Empleado', required: true, table: true },
     { key: 'puesto', label: 'Puesto', table: true },
@@ -75,15 +75,15 @@ export const antidopingConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🧪', label: 'Pruebas', count: r => r.length },
-    { icon: '✅', label: 'Negativas', count: r => r.filter(x => x.resultado === 'Negativo').length },
-    { icon: '🚨', label: 'Positivas', count: r => r.filter(x => x.resultado === 'Positivo').length },
-    { icon: '⏳', label: 'Pendientes', count: r => r.filter(x => x.resultado === 'Pendiente').length },
+    { icon: 'AN', label: 'Pruebas', count: r => r.length },
+    { icon: 'OK', label: 'Negativas', count: r => r.filter(x => x.resultado === 'Negativo').length },
+    { icon: 'AL', label: 'Positivas', count: r => r.filter(x => x.resultado === 'Positivo').length },
+    { icon: 'PD', label: 'Pendientes', count: r => r.filter(x => x.resultado === 'Pendiente').length },
   ],
 }
 
 export const alcoholimetroConfig: CrudConfig = {
-  table: 'alcoholimetro', icon: '🚨', title: 'Alcoholímetro', subtitle: 'Pruebas de alcoholemia', addLabel: 'Registrar prueba',
+  table: 'alcoholimetro', icon: 'AL', title: 'Alcoholímetro', subtitle: 'Pruebas de alcoholemia', addLabel: 'Registrar prueba',
   fields: [
     { key: 'nombre_empleado', label: 'Empleado', required: true, table: true },
     { key: 'puesto', label: 'Puesto', table: true },
@@ -93,15 +93,15 @@ export const alcoholimetroConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🚨', label: 'Pruebas', count: r => r.length },
-    { icon: '✅', label: 'Negativas', count: r => r.filter(x => x.resultado === 'Negativo').length },
-    { icon: '⚠️', label: 'Positivas', count: r => r.filter(x => x.resultado === 'Positivo').length },
-    { icon: '📅', label: 'Este mes', count: r => r.filter(x => x.fecha && new Date(x.fecha).getMonth() === new Date().getMonth() && new Date(x.fecha).getFullYear() === new Date().getFullYear()).length },
+    { icon: 'AL', label: 'Pruebas', count: r => r.length },
+    { icon: 'OK', label: 'Negativas', count: r => r.filter(x => x.resultado === 'Negativo').length },
+    { icon: 'AR', label: 'Positivas', count: r => r.filter(x => x.resultado === 'Positivo').length },
+    { icon: 'DT', label: 'Este mes', count: r => r.filter(x => x.fecha && new Date(x.fecha).getMonth() === new Date().getMonth() && new Date(x.fecha).getFullYear() === new Date().getFullYear()).length },
   ],
 }
 
 export const asistenciaConfig: CrudConfig = {
-  table: 'asistencia', icon: '🕐', title: 'Asistencia', subtitle: 'Control de entradas y salidas del personal', addLabel: 'Registrar asistencia',
+  table: 'asistencia', icon: 'AS', title: 'Asistencia', subtitle: 'Control de entradas y salidas del personal', addLabel: 'Registrar asistencia',
   fields: [
     { key: 'nombre_empleado', label: 'Empleado', required: true, table: true },
     { key: 'fecha', label: 'Fecha', type: 'date', required: true, table: true },
@@ -111,15 +111,15 @@ export const asistenciaConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🕐', label: 'Registros', count: r => r.length },
-    { icon: '📅', label: 'Hoy', count: r => r.filter(x => x.fecha === new Date().toISOString().slice(0, 10)).length },
-    { icon: '⏰', label: 'Retardos', count: r => r.filter(x => x.tipo === 'Retardo').length },
-    { icon: '❌', label: 'Faltas', count: r => r.filter(x => x.tipo === 'Falta').length },
+    { icon: 'AS', label: 'Registros', count: r => r.length },
+    { icon: 'DT', label: 'Hoy', count: r => r.filter(x => x.fecha === new Date().toISOString().slice(0, 10)).length },
+    { icon: 'RT', label: 'Retardos', count: r => r.filter(x => x.tipo === 'Retardo').length },
+    { icon: 'NO', label: 'Faltas', count: r => r.filter(x => x.tipo === 'Falta').length },
   ],
 }
 
 export const personalConfig: CrudConfig = {
-  table: 'empleados', icon: '👥', title: 'Personal', subtitle: 'Plantilla de empleados', addLabel: 'Nuevo empleado', orderBy: 'nombre', orderAsc: true,
+  table: 'empleados', icon: 'PE', title: 'Personal', subtitle: 'Plantilla de empleados', addLabel: 'Nuevo empleado', orderBy: 'nombre', orderAsc: true,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'numero_empleado', label: 'No. empleado', table: true },
@@ -129,15 +129,15 @@ export const personalConfig: CrudConfig = {
     { key: 'activo', label: 'Activo', type: 'boolean', table: true },
   ],
   kpis: [
-    { icon: '👥', label: 'Empleados', count: r => r.length },
-    { icon: '✅', label: 'Activos', count: r => r.filter(x => x.activo).length },
-    { icon: '📁', label: 'Departamentos', count: r => new Set(r.map(x => x.departamento).filter(Boolean)).size },
-    { icon: '🆕', label: 'Este año', count: r => r.filter(x => x.fecha_ingreso && new Date(x.fecha_ingreso).getFullYear() === new Date().getFullYear()).length },
+    { icon: 'PE', label: 'Empleados', count: r => r.length },
+    { icon: 'OK', label: 'Activos', count: r => r.filter(x => x.activo).length },
+    { icon: 'FL', label: 'Departamentos', count: r => new Set(r.map(x => x.departamento).filter(Boolean)).size },
+    { icon: 'NW', label: 'Este año', count: r => r.filter(x => x.fecha_ingreso && new Date(x.fecha_ingreso).getFullYear() === new Date().getFullYear()).length },
   ],
 }
 
 export const mantenimientoConfig: CrudConfig = {
-  table: 'mantenimiento', icon: '🔧', title: 'Mantenimiento', subtitle: 'Servicios preventivos y correctivos de unidades', addLabel: 'Programar servicio',
+  table: 'mantenimiento', icon: 'MT', title: 'Mantenimiento', subtitle: 'Servicios preventivos y correctivos de unidades', addLabel: 'Programar servicio',
   fields: [
     { key: 'tracto_numero', label: 'Unidad', required: true, table: true },
     { key: 'tipo', label: 'Tipo', type: 'select', required: true, options: ['Preventivo', 'Correctivo'], table: true, badge: { Preventivo: 'blue', Correctivo: 'amber' } },
@@ -151,15 +151,15 @@ export const mantenimientoConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🔧', label: 'Servicios', count: r => r.length },
-    { icon: '⏳', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
-    { icon: '⚙️', label: 'En proceso', count: r => r.filter(x => x.estado === 'En_Proceso').length },
-    { icon: '💰', label: 'Costo total', count: r => r.reduce((a, x) => a + (x.costo ?? 0), 0) },
+    { icon: 'MT', label: 'Servicios', count: r => r.length },
+    { icon: 'PD', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
+    { icon: 'PR', label: 'En proceso', count: r => r.filter(x => x.estado === 'En_Proceso').length },
+    { icon: 'MX', label: 'Costo total', count: r => r.reduce((a, x) => a + (x.costo ?? 0), 0) },
   ],
 }
 
 export const instalacionesConfig: CrudConfig = {
-  table: 'mantenimiento_instalaciones', icon: '🏭', title: 'Instalaciones', subtitle: 'Mantenimiento e inspección de instalaciones', addLabel: 'Nuevo registro',
+  table: 'mantenimiento_instalaciones', icon: 'IN', title: 'Instalaciones', subtitle: 'Mantenimiento e inspección de instalaciones', addLabel: 'Nuevo registro',
   fields: [
     { key: 'area', label: 'Área', required: true, table: true },
     { key: 'tipo', label: 'Tipo', type: 'select', options: ['Mantenimiento', 'Inspección', 'Reparación', 'Limpieza'], table: true },
@@ -171,15 +171,15 @@ export const instalacionesConfig: CrudConfig = {
     { key: 'costo', label: 'Costo (MXN)', type: 'number' },
   ],
   kpis: [
-    { icon: '🏭', label: 'Registros', count: r => r.length },
-    { icon: '⏳', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
-    { icon: '✅', label: 'Completados', count: r => r.filter(x => x.estado === 'Completado').length },
-    { icon: '💰', label: 'Costo total', count: r => r.reduce((a, x) => a + (x.costo ?? 0), 0) },
+    { icon: 'IN', label: 'Registros', count: r => r.length },
+    { icon: 'PD', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
+    { icon: 'OK', label: 'Completados', count: r => r.filter(x => x.estado === 'Completado').length },
+    { icon: 'MX', label: 'Costo total', count: r => r.reduce((a, x) => a + (x.costo ?? 0), 0) },
   ],
 }
 
 export const analisisRutaConfig: CrudConfig = {
-  table: 'analisis_ruta', icon: '🗺️', title: 'Análisis de Ruta', subtitle: 'Evaluación de riesgo por ruta', addLabel: 'Nueva ruta',
+  table: 'analisis_ruta', icon: 'RT', title: 'Análisis de Ruta', subtitle: 'Evaluación de riesgo por ruta', addLabel: 'Nueva ruta',
   fields: [
     { key: 'nombre_ruta', label: 'Ruta', required: true, table: true },
     { key: 'origen', label: 'Origen', required: true, table: true },
@@ -192,15 +192,15 @@ export const analisisRutaConfig: CrudConfig = {
     { key: 'activo', label: 'Activa', type: 'boolean' },
   ],
   kpis: [
-    { icon: '🗺️', label: 'Rutas', count: r => r.length },
-    { icon: '🟢', label: 'Riesgo bajo', count: r => r.filter(x => x.nivel_riesgo === 'Bajo').length },
-    { icon: '🟡', label: 'Riesgo medio', count: r => r.filter(x => x.nivel_riesgo === 'Medio').length },
-    { icon: '🔴', label: 'Alto/Crítico', count: r => r.filter(x => x.nivel_riesgo === 'Alto' || x.nivel_riesgo === 'Crítico').length },
+    { icon: 'RT', label: 'Rutas', count: r => r.length },
+    { icon: 'LO', label: 'Riesgo bajo', count: r => r.filter(x => x.nivel_riesgo === 'Bajo').length },
+    { icon: 'MD', label: 'Riesgo medio', count: r => r.filter(x => x.nivel_riesgo === 'Medio').length },
+    { icon: 'HI', label: 'Alto/Crítico', count: r => r.filter(x => x.nivel_riesgo === 'Alto' || x.nivel_riesgo === 'Crítico').length },
   ],
 }
 
 export const analisisRiesgosConfig: CrudConfig = {
-  table: 'analisis_riesgos', icon: '⚠️', title: 'Análisis de Riesgos', subtitle: 'Matriz de riesgos operativos', addLabel: 'Nuevo riesgo',
+  table: 'analisis_riesgos', icon: 'AR', title: 'Análisis de Riesgos', subtitle: 'Matriz de riesgos operativos', addLabel: 'Nuevo riesgo',
   fields: [
     { key: 'tipo', label: 'Tipo', type: 'select', options: ['Seguridad', 'Operativo', 'Financiero', 'Legal', 'Cibernético'], table: true },
     { key: 'descripcion', label: 'Descripción', type: 'textarea', required: true, table: true },
@@ -212,15 +212,15 @@ export const analisisRiesgosConfig: CrudConfig = {
     { key: 'responsable', label: 'Responsable', table: true },
   ],
   kpis: [
-    { icon: '⚠️', label: 'Riesgos', count: r => r.length },
-    { icon: '🔴', label: 'Alto/Crítico', count: r => r.filter(x => x.nivel === 'Alto' || x.nivel === 'Crítico').length },
-    { icon: '🛡️', label: 'Controlados', count: r => r.filter(x => x.estado === 'Controlado').length },
-    { icon: '🔄', label: 'En mitigación', count: r => r.filter(x => x.estado === 'En_Mitigacion').length },
+    { icon: 'AR', label: 'Riesgos', count: r => r.length },
+    { icon: 'HI', label: 'Alto/Crítico', count: r => r.filter(x => x.nivel === 'Alto' || x.nivel === 'Crítico').length },
+    { icon: 'SH', label: 'Controlados', count: r => r.filter(x => x.estado === 'Controlado').length },
+    { icon: 'IP', label: 'En mitigación', count: r => r.filter(x => x.estado === 'En_Mitigacion').length },
   ],
 }
 
 export const ciberseguridadConfig: CrudConfig = {
-  table: 'ciberseguridad', icon: '🖥️', title: 'Ciberseguridad', subtitle: 'Eventos e incidentes de seguridad informática', addLabel: 'Registrar evento',
+  table: 'ciberseguridad', icon: 'CB', title: 'Ciberseguridad', subtitle: 'Eventos e incidentes de seguridad informática', addLabel: 'Registrar evento',
   fields: [
     { key: 'tipo_evento', label: 'Tipo de evento', type: 'select', required: true, options: ['Phishing', 'Malware', 'Acceso_No_Autorizado', 'Fuga_De_Datos', 'Capacitación', 'Auditoría', 'Otro'], table: true },
     { key: 'descripcion', label: 'Descripción', type: 'textarea', required: true, table: true },
@@ -231,15 +231,15 @@ export const ciberseguridadConfig: CrudConfig = {
     { key: 'accion_tomada', label: 'Acción tomada', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🖥️', label: 'Eventos', count: r => r.length },
-    { icon: '🚨', label: 'Alta/Crítica', count: r => r.filter(x => x.severidad === 'Alta' || x.severidad === 'Crítica').length },
-    { icon: '🔍', label: 'Abiertos', count: r => r.filter(x => x.estado === 'Abierto' || x.estado === 'En_Investigacion').length },
-    { icon: '✅', label: 'Resueltos', count: r => r.filter(x => x.estado === 'Resuelto').length },
+    { icon: 'CB', label: 'Eventos', count: r => r.length },
+    { icon: 'AL', label: 'Alta/Crítica', count: r => r.filter(x => x.severidad === 'Alta' || x.severidad === 'Crítica').length },
+    { icon: 'OP', label: 'Abiertos', count: r => r.filter(x => x.estado === 'Abierto' || x.estado === 'En_Investigacion').length },
+    { icon: 'OK', label: 'Resueltos', count: r => r.filter(x => x.estado === 'Resuelto').length },
   ],
 }
 
 export const accionesCorrectivasConfig: CrudConfig = {
-  table: 'acciones_correctivas', icon: '🛠️', title: 'Acciones Correctivas', subtitle: 'Seguimiento de no conformidades', addLabel: 'Nueva acción',
+  table: 'acciones_correctivas', icon: 'AC', title: 'Acciones Correctivas', subtitle: 'Seguimiento de no conformidades', addLabel: 'Nueva acción',
   fields: [
     { key: 'titulo', label: 'Título', required: true, table: true },
     { key: 'area', label: 'Área', table: true },
@@ -253,15 +253,15 @@ export const accionesCorrectivasConfig: CrudConfig = {
     { key: 'accion_tomada', label: 'Acción tomada', type: 'textarea' },
   ],
   kpis: [
-    { icon: '🛠️', label: 'Acciones', count: r => r.length },
-    { icon: '📂', label: 'Abiertas', count: r => r.filter(x => x.estado === 'Abierta').length },
-    { icon: '🔄', label: 'En proceso', count: r => r.filter(x => x.estado === 'En_Proceso').length },
-    { icon: '⏰', label: 'Vencidas', count: r => r.filter(x => x.estado !== 'Cerrada' && x.fecha_limite && new Date(x.fecha_limite) < new Date()).length },
+    { icon: 'AC', label: 'Acciones', count: r => r.length },
+    { icon: 'FL', label: 'Abiertas', count: r => r.filter(x => x.estado === 'Abierta').length },
+    { icon: 'IP', label: 'En proceso', count: r => r.filter(x => x.estado === 'En_Proceso').length },
+    { icon: 'RT', label: 'Vencidas', count: r => r.filter(x => x.estado !== 'Cerrada' && x.fecha_limite && new Date(x.fecha_limite) < new Date()).length },
   ],
 }
 
 export const revisionDocumentalConfig: CrudConfig = {
-  table: 'revision_documental', icon: '📄', title: 'Revisión Documental', subtitle: 'Vigencia de documentos de unidades, operadores y empresa', addLabel: 'Nuevo documento',
+  table: 'revision_documental', icon: 'RD', title: 'Revisión Documental', subtitle: 'Vigencia de documentos de unidades, operadores y empresa', addLabel: 'Nuevo documento',
   fields: [
     { key: 'entidad', label: 'Entidad (unidad/operador)', required: true, table: true },
     { key: 'tipo_entidad', label: 'Tipo entidad', type: 'select', options: ['Unidad', 'Operador', 'Empresa'], table: true },
@@ -272,15 +272,15 @@ export const revisionDocumentalConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '📄', label: 'Documentos', count: r => r.length },
-    { icon: '✅', label: 'Vigentes', count: r => r.filter(x => x.estado === 'Vigente').length },
-    { icon: '⚠️', label: 'Por vencer', count: r => r.filter(x => x.estado === 'Por_Vencer').length },
-    { icon: '❌', label: 'Vencidos', count: r => r.filter(x => x.estado === 'Vencido').length },
+    { icon: 'RD', label: 'Documentos', count: r => r.length },
+    { icon: 'OK', label: 'Vigentes', count: r => r.filter(x => x.estado === 'Vigente').length },
+    { icon: 'AR', label: 'Por vencer', count: r => r.filter(x => x.estado === 'Por_Vencer').length },
+    { icon: 'NO', label: 'Vencidos', count: r => r.filter(x => x.estado === 'Vencido').length },
   ],
 }
 
 export const inventarioConfig: CrudConfig = {
-  table: 'inventario_equipo', icon: '📦', title: 'Inventario de Equipo', subtitle: 'Equipo y herramientas de la empresa', addLabel: 'Nuevo equipo',
+  table: 'inventario_equipo', icon: 'IE', title: 'Inventario de Equipo', subtitle: 'Equipo y herramientas de la empresa', addLabel: 'Nuevo equipo',
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'codigo', label: 'Código', table: true },
@@ -292,15 +292,15 @@ export const inventarioConfig: CrudConfig = {
     { key: 'observaciones', label: 'Observaciones', type: 'textarea' },
   ],
   kpis: [
-    { icon: '📦', label: 'Equipos', count: r => r.length },
-    { icon: '✅', label: 'Disponibles', count: r => r.filter(x => x.estado === 'Disponible').length },
-    { icon: '👤', label: 'Asignados', count: r => r.filter(x => x.estado === 'Asignado').length },
-    { icon: '💰', label: 'Valor total', count: r => r.reduce((a, x) => a + (x.valor ?? 0), 0) },
+    { icon: 'IE', label: 'Equipos', count: r => r.length },
+    { icon: 'OK', label: 'Disponibles', count: r => r.filter(x => x.estado === 'Disponible').length },
+    { icon: 'US', label: 'Asignados', count: r => r.filter(x => x.estado === 'Asignado').length },
+    { icon: 'MX', label: 'Valor total', count: r => r.reduce((a, x) => a + (x.valor ?? 0), 0) },
   ],
 }
 
 export const inventarioOperadorConfig: CrudConfig = {
-  table: 'inventario_operador', icon: '🎒', title: 'Inventario de Operador', subtitle: 'Artículos entregados a operadores', addLabel: 'Entregar artículo',
+  table: 'inventario_operador', icon: 'IO', title: 'Inventario de Operador', subtitle: 'Artículos entregados a operadores', addLabel: 'Entregar artículo',
   fields: [
     { key: 'operador_nombre', label: 'Operador', required: true, table: true },
     { key: 'tipo_articulo', label: 'Artículo', required: true, table: true },
@@ -311,15 +311,15 @@ export const inventarioOperadorConfig: CrudConfig = {
     { key: 'estado', label: 'Estado', type: 'select', options: ['Entregado', 'Devuelto', 'Extraviado', 'Dañado'], table: true, badge: { Entregado: 'blue', Devuelto: 'green', Extraviado: 'red', Dañado: 'amber' } },
   ],
   kpis: [
-    { icon: '🎒', label: 'Entregas', count: r => r.length },
-    { icon: '📤', label: 'Entregados', count: r => r.filter(x => x.estado === 'Entregado').length },
-    { icon: '📥', label: 'Devueltos', count: r => r.filter(x => x.estado === 'Devuelto').length },
-    { icon: '⚠️', label: 'Extraviados/Dañados', count: r => r.filter(x => x.estado === 'Extraviado' || x.estado === 'Dañado').length },
+    { icon: 'IO', label: 'Entregas', count: r => r.length },
+    { icon: 'UP', label: 'Entregados', count: r => r.filter(x => x.estado === 'Entregado').length },
+    { icon: 'DN', label: 'Devueltos', count: r => r.filter(x => x.estado === 'Devuelto').length },
+    { icon: 'AR', label: 'Extraviados/Dañados', count: r => r.filter(x => x.estado === 'Extraviado' || x.estado === 'Dañado').length },
   ],
 }
 
 export const almacenConfig: CrudConfig = {
-  table: 'almacen_refacciones', icon: '🏬', title: 'Almacén de Refacciones', subtitle: 'Existencias y stock mínimo', addLabel: 'Nueva refacción', orderBy: 'nombre', orderAsc: true,
+  table: 'almacen_refacciones', icon: 'AR', title: 'Almacén de Refacciones', subtitle: 'Existencias y stock mínimo', addLabel: 'Nueva refacción', orderBy: 'nombre', orderAsc: true,
   fields: [
     { key: 'nombre', label: 'Refacción', required: true, table: true },
     { key: 'codigo', label: 'Código', table: true },
@@ -331,15 +331,15 @@ export const almacenConfig: CrudConfig = {
     { key: 'ubicacion', label: 'Ubicación' },
   ],
   kpis: [
-    { icon: '🏬', label: 'Refacciones', count: r => r.length },
-    { icon: '📉', label: 'Bajo mínimo', sub: 'Reordenar', count: r => r.filter(x => (x.cantidad ?? 0) <= (x.cantidad_minima ?? 0)).length },
-    { icon: '📦', label: 'Piezas totales', count: r => r.reduce((a, x) => a + (x.cantidad ?? 0), 0) },
-    { icon: '💰', label: 'Valor inventario', count: r => Math.round(r.reduce((a, x) => a + (x.cantidad ?? 0) * (x.precio_unitario ?? 0), 0)) },
+    { icon: 'AR', label: 'Refacciones', count: r => r.length },
+    { icon: 'DN', label: 'Bajo mínimo', sub: 'Reordenar', count: r => r.filter(x => (x.cantidad ?? 0) <= (x.cantidad_minima ?? 0)).length },
+    { icon: 'IE', label: 'Piezas totales', count: r => r.reduce((a, x) => a + (x.cantidad ?? 0), 0) },
+    { icon: 'MX', label: 'Valor inventario', count: r => Math.round(r.reduce((a, x) => a + (x.cantidad ?? 0) * (x.precio_unitario ?? 0), 0)) },
   ],
 }
 
 export const clientesConfig: CrudConfig = {
-  table: 'clientes_ctpat', icon: '🤝', title: 'Clientes', subtitle: 'Clientes y certificaciones CTPAT', addLabel: 'Nuevo cliente', orderBy: 'nombre', orderAsc: true,
+  table: 'clientes_ctpat', icon: 'CL', title: 'Clientes', subtitle: 'Clientes y certificaciones CTPAT', addLabel: 'Nuevo cliente', orderBy: 'nombre', orderAsc: true,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'rfc', label: 'RFC', table: true },
@@ -352,30 +352,30 @@ export const clientesConfig: CrudConfig = {
     { key: 'activo', label: 'Activo', type: 'boolean' },
   ],
   kpis: [
-    { icon: '🤝', label: 'Clientes', count: r => r.length },
-    { icon: '✅', label: 'Activos', count: r => r.filter(x => x.activo).length },
-    { icon: '🛡️', label: 'Certificados', count: r => r.filter(x => x.nivel === 'Certificado').length },
-    { icon: '⚠️', label: 'Cert. por vencer', sub: '90 días', count: r => r.filter(x => x.fecha_vencimiento && new Date(x.fecha_vencimiento) < new Date(Date.now() + 90 * 864e5) && new Date(x.fecha_vencimiento) >= new Date()).length },
+    { icon: 'CL', label: 'Clientes', count: r => r.length },
+    { icon: 'OK', label: 'Activos', count: r => r.filter(x => x.activo).length },
+    { icon: 'SH', label: 'Certificados', count: r => r.filter(x => x.nivel === 'Certificado').length },
+    { icon: 'AR', label: 'Cert. por vencer', sub: '90 días', count: r => r.filter(x => x.fecha_vencimiento && new Date(x.fecha_vencimiento) < new Date(Date.now() + 90 * 864e5) && new Date(x.fecha_vencimiento) >= new Date()).length },
   ],
 }
 
 export const zonasConfig: CrudConfig = {
-  table: 'zonas_rondin', icon: '📍', title: 'Zonas de Seguridad', subtitle: 'Puntos de control para rondines', addLabel: 'Nueva zona', orderBy: 'nombre', orderAsc: true,
+  table: 'zonas_rondin', icon: 'ZS', title: 'Zonas de Seguridad', subtitle: 'Puntos de control para rondines', addLabel: 'Nueva zona', orderBy: 'nombre', orderAsc: true,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'qr_code', label: 'Código QR', table: true },
     { key: 'activo', label: 'Activa', type: 'boolean', table: true },
   ],
   kpis: [
-    { icon: '📍', label: 'Zonas', count: r => r.length },
-    { icon: '✅', label: 'Activas', count: r => r.filter(x => x.activo).length },
-    { icon: '🚫', label: 'Inactivas', count: r => r.filter(x => !x.activo).length },
-    { icon: '🔳', label: 'Con QR', count: r => r.filter(x => x.qr_code).length },
+    { icon: 'ZS', label: 'Zonas', count: r => r.length },
+    { icon: 'OK', label: 'Activas', count: r => r.filter(x => x.activo).length },
+    { icon: 'NO', label: 'Inactivas', count: r => r.filter(x => !x.activo).length },
+    { icon: 'QR', label: 'Con QR', count: r => r.filter(x => x.qr_code).length },
   ],
 }
 
 export const liquidacionesConfig: CrudConfig = {
-  table: 'liquidaciones', icon: '💵', title: 'Liquidaciones', subtitle: 'Pagos a operadores por viaje', addLabel: 'Nueva liquidación',
+  table: 'liquidaciones', icon: 'LI', title: 'Liquidaciones', subtitle: 'Pagos a operadores por viaje', addLabel: 'Nueva liquidación',
   fields: [
     { key: 'operador_nombre', label: 'Operador', required: true, table: true },
     { key: 'periodo', label: 'Periodo', table: true },
@@ -388,15 +388,15 @@ export const liquidacionesConfig: CrudConfig = {
     { key: 'notas', label: 'Notas', type: 'textarea' },
   ],
   kpis: [
-    { icon: '💵', label: 'Liquidaciones', count: r => r.length },
-    { icon: '⏳', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
-    { icon: '✅', label: 'Pagadas', count: r => r.filter(x => x.estado === 'Pagada').length },
-    { icon: '💰', label: 'Total pagado', count: r => Math.round(r.filter(x => x.estado === 'Pagada').reduce((a, x) => a + (x.total ?? 0), 0)) },
+    { icon: 'LI', label: 'Liquidaciones', count: r => r.length },
+    { icon: 'PD', label: 'Pendientes', count: r => r.filter(x => x.estado === 'Pendiente').length },
+    { icon: 'OK', label: 'Pagadas', count: r => r.filter(x => x.estado === 'Pagada').length },
+    { icon: 'MX', label: 'Total pagado', count: r => Math.round(r.filter(x => x.estado === 'Pagada').reduce((a, x) => a + (x.total ?? 0), 0)) },
   ],
 }
 
 export const operadoresConfig: CrudConfig = {
-  table: 'operadores', icon: '🧑‍✈️', title: 'Operadores', subtitle: 'Choferes y licencias', addLabel: 'Nuevo operador', orderBy: 'nombre', orderAsc: true,
+  table: 'operadores', icon: 'OP', title: 'Operadores', subtitle: 'Choferes y licencias', addLabel: 'Nuevo operador', orderBy: 'nombre', orderAsc: true,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'numero_licencia', label: 'No. licencia', table: true },
@@ -404,9 +404,9 @@ export const operadoresConfig: CrudConfig = {
     { key: 'activo', label: 'Activo', type: 'boolean', table: true },
   ],
   kpis: [
-    { icon: '🧑‍✈️', label: 'Operadores', count: r => r.length },
-    { icon: '✅', label: 'Activos', count: r => r.filter(x => x.activo).length },
-    { icon: '⚠️', label: 'Licencia por vencer', sub: '60 días', count: r => r.filter(x => x.vigencia_licencia && new Date(x.vigencia_licencia) < new Date(Date.now() + 60 * 864e5) && new Date(x.vigencia_licencia) >= new Date()).length },
-    { icon: '❌', label: 'Licencia vencida', count: r => r.filter(x => x.vigencia_licencia && new Date(x.vigencia_licencia) < new Date()).length },
+    { icon: 'OP', label: 'Operadores', count: r => r.length },
+    { icon: 'OK', label: 'Activos', count: r => r.filter(x => x.activo).length },
+    { icon: 'AR', label: 'Licencia por vencer', sub: '60 días', count: r => r.filter(x => x.vigencia_licencia && new Date(x.vigencia_licencia) < new Date(Date.now() + 60 * 864e5) && new Date(x.vigencia_licencia) >= new Date()).length },
+    { icon: 'NO', label: 'Licencia vencida', count: r => r.filter(x => x.vigencia_licencia && new Date(x.vigencia_licencia) < new Date()).length },
   ],
 }

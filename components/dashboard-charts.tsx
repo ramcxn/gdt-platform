@@ -9,8 +9,8 @@ function getThemeColors() {
   }
   const styles = getComputedStyle(document.documentElement)
   return {
-    text: styles.getPropertyValue('--text-tertiary').trim() || '#94a3b8',
-    grid: styles.getPropertyValue('--border-subtle').trim() || 'rgba(148,163,184,0.15)',
+    text: styles.getPropertyValue('--text-muted').trim() || '#8896a6',
+    grid: styles.getPropertyValue('--border-subtle').trim() || 'rgba(255,255,255,0.05)',
   }
 }
 
@@ -37,7 +37,7 @@ export function MovimientosDoughnut({
         datasets: [
           {
             data: [entradas, salidas, danos],
-            backgroundColor: ['#3B82F6', '#8B5CF6', '#FB7185'],
+            backgroundColor: ['#3B82F6', '#6366F1', '#FB7185'],
             borderWidth: 0,
           },
         ],
