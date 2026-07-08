@@ -1,6 +1,8 @@
 /* eslint-disable */
 // Configuraciones CRUD por módulo — campos alineados al esquema real de Supabase.
 import type { CrudConfig } from '@/components/crud/CrudModule'
+import QrBadgeButton from '@/components/qr/QrBadgeButton'
+import { ScanLine } from 'lucide-react'
 
 const estadoServicio = { Pendiente: 'amber', En_Proceso: 'blue', Completado: 'green', Cancelado: 'red' }
 const abiertoCerrado = { Abierta: 'amber', En_Proceso: 'blue', Cerrada: 'green' }
@@ -34,6 +36,7 @@ export const visitasConfig: CrudConfig = {
     { key: 'numero_gafete', label: 'Gafete', table: true },
     { key: 'tiene_cita', label: '¿Tiene cita?', type: 'boolean' },
     { key: 'objetos', label: 'Objetos que ingresa', type: 'textarea' },
+    { key: 'identificacion_url', label: 'Foto de identificación', type: 'photo', table: true },
     { key: 'entrada', label: 'Entrada', type: 'datetime', table: true },
     { key: 'salida', label: 'Salida', type: 'datetime' },
   ],
@@ -102,6 +105,7 @@ export const alcoholimetroConfig: CrudConfig = {
 
 export const asistenciaConfig: CrudConfig = {
   table: 'asistencia', icon: 'AS', title: 'Asistencia', subtitle: 'Control de entradas y salidas del personal', addLabel: 'Registrar asistencia',
+  headerLink: { href: '/asistencia/escanear', label: 'Escanear QR', icon: <ScanLine className="w-4 h-4" /> },
   fields: [
     { key: 'nombre_empleado', label: 'Empleado', required: true, table: true },
     { key: 'fecha', label: 'Fecha', type: 'date', required: true, table: true },
@@ -120,6 +124,7 @@ export const asistenciaConfig: CrudConfig = {
 
 export const personalConfig: CrudConfig = {
   table: 'empleados', icon: 'PE', title: 'Personal', subtitle: 'Plantilla de empleados', addLabel: 'Nuevo empleado', orderBy: 'nombre', orderAsc: true,
+  rowActions: (row) => <QrBadgeButton value={row.numero_empleado || row.id} title={row.nombre} subtitle={row.puesto} />,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'numero_empleado', label: 'No. empleado', table: true },
@@ -169,6 +174,7 @@ export const instalacionesConfig: CrudConfig = {
     { key: 'estado', label: 'Estado', type: 'select', required: true, options: ['Pendiente', 'En_Proceso', 'Completado', 'Cancelado'], table: true, badge: estadoServicio },
     { key: 'responsable', label: 'Responsable', table: true },
     { key: 'costo', label: 'Costo (MXN)', type: 'number' },
+    { key: 'evidencia_url', label: 'Evidencia fotográfica', type: 'photo' },
   ],
   kpis: [
     { icon: 'IN', label: 'Registros', count: r => r.length },
@@ -361,6 +367,7 @@ export const clientesConfig: CrudConfig = {
 
 export const zonasConfig: CrudConfig = {
   table: 'zonas_rondin', icon: 'ZS', title: 'Zonas de Seguridad', subtitle: 'Puntos de control para rondines', addLabel: 'Nueva zona', orderBy: 'nombre', orderAsc: true,
+  rowActions: (row) => <QrBadgeButton value={row.qr_code || row.id} title={row.nombre} subtitle="Zona de rondín" />,
   fields: [
     { key: 'nombre', label: 'Nombre', required: true, table: true },
     { key: 'qr_code', label: 'Código QR', table: true },
