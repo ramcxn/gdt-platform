@@ -1,11 +1,12 @@
 /* eslint-disable */
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, Edit2, Trash2, Search, Loader2, Download, X } from 'lucide-react'
+import { Plus, Edit2, Trash2, Search, Loader2, Download, X, Camera } from 'lucide-react'
 
 // ─── Tipos de configuración ───────────────────────────────────────────────
-export type FieldType = 'text' | 'number' | 'date' | 'datetime' | 'select' | 'boolean' | 'textarea'
+export type FieldType = 'text' | 'number' | 'date' | 'datetime' | 'select' | 'boolean' | 'textarea' | 'photo'
 
 export interface FieldDef {
   key: string
@@ -34,6 +35,8 @@ export interface CrudConfig {
   fields: FieldDef[]
   kpis?: KpiDef[]
   addLabel?: string
+  headerLink?: { href: string; label: string; icon?: ReactNode }  // botón extra en el header
+  rowActions?: (row: any) => ReactNode                            // acciones extra por fila
 }
 
 // ─── Utilidades ───────────────────────────────────────────────────────────
@@ -75,6 +78,20 @@ export default function CrudModule({ config }: { config: CrudConfig }) {
   const [form, setForm] = useState<Record<string, any>>({})
   const [empresaId, setEmpresaId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState<string | null>(null)
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  async function handlePhotoUpload(fieldKey: string, file: File) {
+    if (!empresaId) return
+    setUploading(fieldKey)
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${empresaId}/${config.table}/${Date.now()}.${ext}`
+    const { error: upErr } = await supabase.storage.from('evidencias').upload(path, file, { upsert: false })
+    setUploading(null)
+    if (upErr) { setError('Error al subir foto: ' + upErr.message); return }
+    const { data } = supabase.storage.from('evidencias').getPublicUrl(path)
+    setForm(f => ({ ...f, [fieldKey]: data.publicUrl }))
+  }
 
   const tableFields = useMemo(() => {
     const explicit = config.fields.filter(f => f.table)
@@ -179,6 +196,12 @@ export default function CrudModule({ config }: { config: CrudConfig }) {
           </div>
         </div>
         <div className="flex gap-2">
+          {config.headerLink && (
+            <Link href={config.headerLink.href}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-white/10 text-slate-300 hover:bg-white/5">
+              {config.headerLink.icon}{config.headerLink.label}
+            </Link>
+          )}
           <button onClick={handleExport}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-white/10 text-slate-300 hover:bg-white/5 cursor-pointer">
             <Download className="w-4 h-4" /> CSV
@@ -234,7 +257,11 @@ export default function CrudModule({ config }: { config: CrudConfig }) {
                 <tr key={row.id} className="hover:bg-white/5 transition-colors">
                   {tableFields.map((f, i) => (
                     <td key={f.key} className={`px-4 py-3 whitespace-nowrap ${i === 0 ? 'font-medium text-white' : ''}`}>
-                      {f.badge && row[f.key] ? (
+                      {f.type === 'photo' && row[f.key] ? (
+                        <a href={row[f.key]} target="_blank" rel="noreferrer">
+                          <img src={row[f.key]} alt={f.label} className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                        </a>
+                      ) : f.badge && row[f.key] ? (
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${BADGE[f.badge[row[f.key]] ?? 'slate']}`}>
                           {String(row[f.key]).replace(/_/g, ' ')}
                         </span>
@@ -243,6 +270,7 @@ export default function CrudModule({ config }: { config: CrudConfig }) {
                   ))}
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {config.rowActions?.(row)}
                       <button onClick={() => openEdit(row)} className="p-1.5 text-slate-400 hover:text-blue-400 cursor-pointer"><Edit2 className="w-4 h-4" /></button>
                       <button onClick={() => handleDelete(row)} className="p-1.5 text-slate-400 hover:text-red-400 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                     </div>
@@ -281,6 +309,18 @@ export default function CrudModule({ config }: { config: CrudConfig }) {
                         className="w-4 h-4 accent-blue-500" />
                       <span className="text-sm text-slate-300">Sí</span>
                     </label>
+                  ) : f.type === 'photo' ? (
+                    <div className="flex items-center gap-3">
+                      <input type="file" accept="image/*" capture="environment" className="hidden"
+                        ref={el => { fileInputRefs.current[f.key] = el }}
+                        onChange={e => { const file = e.target.files?.[0]; if (file) handlePhotoUpload(f.key, file) }} />
+                      <button type="button" onClick={() => fileInputRefs.current[f.key]?.click()}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-white/10 text-slate-300 hover:bg-white/5 cursor-pointer">
+                        <Camera className="w-4 h-4" />
+                        {uploading === f.key ? 'Subiendo...' : form[f.key] ? 'Cambiar foto' : 'Tomar / subir foto'}
+                      </button>
+                      {form[f.key] && <img src={form[f.key]} alt="" className="w-12 h-12 rounded-lg object-cover border border-white/10" />}
+                    </div>
                   ) : f.type === 'textarea' ? (
                     <textarea rows={3} value={form[f.key] ?? ''} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg text-sm text-white bg-transparent border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500" />
